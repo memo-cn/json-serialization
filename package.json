@@ -1,0 +1,14 @@
+{
+    "name": "workspace-root",
+    "version": "1.0.0",
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "scripts": {
+        "prettier": "prettier --write ."
+    },
+    "devDependencies": {
+        "prettier": "^3.2.5"
+    }
+}

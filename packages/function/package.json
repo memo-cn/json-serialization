@@ -1,0 +1,58 @@
+{
+    "name": "@json-serialization/function",
+    "private": false,
+    "version": "0.0.1",
+    "description": "@json-serialization/function provides a mechanism for function serialization and deserialization, which can implement cross-context function calls without using eval. @json-serialization/function 提供了一种函数序列化和反序列化的机制，能够在不使用 eval 的情况下实现函数的跨上下文调用。",
+    "keywords": [
+        "function",
+        "serialization"
+    ],
+    "homepage": "https://github.com/memo-cn/json-serialization/tree/main/packages/function#readme",
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "require": "./dist/index.cjs",
+            "import": "./dist/index.mjs",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build"
+    },
+    "devDependencies": {
+        "@types/node": "^20.12.8",
+        "json-serialization": "^0.0.1",
+        "typescript": "^5.4.5",
+        "vite": "^5.2.10",
+        "vite-plugin-dts": "^3.9.0"
+    },
+    "files": [
+        "dist",
+        "CHANGELOG.md",
+        "LICENSE",
+        "package.json",
+        "README.md",
+        "README.zh-CN.md"
+    ],
+    "author": {
+        "name": "memo",
+        "email": "i@memo.cool"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:memo-cn/json-serialization.git"
+    },
+    "bugs": {
+        "email": "i@memo.cool",
+        "url": "https://github.com/memo-cn/json-serialization/issues"
+    },
+    "publishConfig": {
+        "access": "public",
+        "registry": "https://registry.npmjs.org"
+    },
+    "license": "MIT"
+}

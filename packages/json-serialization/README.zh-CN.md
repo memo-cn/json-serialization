@@ -1,6 +1,6 @@
 # json-serialization<a href="https://github.com/memo-cn/json-serialization/blob/main/packages/json-serialization/README.zh-CN.md"><img src="https://img.shields.io/npm/v/json-serialization.svg" /></a> <a href="https://github.com/memo-cn/json-serialization/blob/main/packages/json-serialization/README.zh-CN.md"><img src="https://packagephobia.now.sh/badge?p=json-serialization" /></a>
 
-[English](README.md) | [简体中文](README.zh-CN.md)
+[English](https://github.com/memo-cn/json-serialization/blob/main/packages/json-serialization/README.md) | [简体中文](https://github.com/memo-cn/json-serialization/blob/main/packages/json-serialization/README.zh-CN.md)
 
 ## 介绍
 
@@ -12,9 +12,10 @@
 
 `json-serialization` 提供了以下方法：
 
-`stringify`：将 JavaScript 对象或值转换为 JSON 字符串。
-
-`parse`：解析 JSON 字符串，构造出对应的 JavaScript 对象或值。
+| 方法        | 作用                                                                                                                                       |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `stringify` | 将一个 JavaScript 对象或值转换为 JSON 字符串, 如果指定了 `serializerList`, 则可以选择性地替换值。                                          |
+| `parse`     | 用来解析 JSON 字符串, 构造由字符串描述的 JavaScript 值或对象。 提供可选的 `deserializerList` 用以在返回之前对所得到的对象执行变换 (操作)。 |
 
 ```ts
 import { stringify, parse } from 'json-serialization';
@@ -82,7 +83,7 @@ const BigIntDeserializer: Deserializer = {
 };
 ```
 
-为了和普通的字符串区分, 我们分别加上一个字符前缀, b 表示 `bigint`, s 表示 `string`。
+为了和普通的字符串区分, 我们分别加上一个字符前缀, `b` 表示 `bigint`, `s` 表示 `string`。
 那么 `memo` 被序列化为 `smemo`, `18n` 被序列化为 `b18`, 解析时再依据前缀判断出原来的类型和值。
 
 ```ts

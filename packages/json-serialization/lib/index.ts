@@ -5,7 +5,7 @@
  */
 export type Serializer = {
     /**
-     * @desc Preliminary test if the value can be serialized, returns falsy then this serializer will not be used
+     * @desc Preliminary test whether the value can be serialized, returns falsy then this serializer will not be used
      * @desc 初步测试值是否可以被序列化，如果返回 falsy，则不会使用此序列化器
      */
     test: (value: any, key: string) => boolean | void | null | undefined;
@@ -23,7 +23,7 @@ export type Serializer = {
  */
 export type Deserializer = {
     /**
-     * @desc Preliminary test if the value can be deserialized, returns falsy then this deserializer will not be used
+     * @desc Preliminary test whether the value can be deserialized, returns falsy then this deserializer will not be used
      * @desc 初步测试值是否可以被反序列化，如果返回 falsy，则不会使用此反序列化器
      */
     test: (value: any, key: string) => boolean | void | null | undefined;

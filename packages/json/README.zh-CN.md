@@ -1,6 +1,6 @@
-# json-serialization<a href="https://github.com/memo-cn/json-serialization/blob/main/packages/json-serialization/README.zh-CN.md"><img src="https://img.shields.io/npm/v/json-serialization.svg" /></a> <a href="https://github.com/memo-cn/json-serialization/blob/main/packages/json-serialization/README.zh-CN.md"><img src="https://packagephobia.now.sh/badge?p=json-serialization" /></a>
+# json-serialization<a href="https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.zh-CN.md"><img src="https://img.shields.io/npm/v/json-serialization.svg" /></a> <a href="https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.zh-CN.md"><img src="https://packagephobia.now.sh/badge?p=json-serialization" /></a>
 
-[English](https://github.com/memo-cn/json-serialization/blob/main/packages/json-serialization/README.md) | [简体中文](https://github.com/memo-cn/json-serialization/blob/main/packages/json-serialization/README.zh-CN.md)
+[English](https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.md) | [简体中文](https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.zh-CN.md)
 
 ## 介绍
 

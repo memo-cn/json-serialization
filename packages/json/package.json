@@ -9,7 +9,7 @@
         "json",
         "serialization"
     ],
-    "homepage": "https://github.com/memo-cn/json-serialization/tree/main/packages/json-serialization",
+    "homepage": "https://github.com/memo-cn/json-serialization/tree/main/packages/json#readme",
     "type": "module",
     "main": "./dist/index.cjs",
     "module": "./dist/index.mjs",

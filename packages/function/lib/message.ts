@@ -16,39 +16,14 @@ export type UnrefData = {
     funId: string;
 };
 
-export function data2Message<T>(msg: T) {
+export function message2Data<D extends { type: string } = never>(msg: any, type: D['type']): D | null {
+    const data = msg?.[NameSpace] || msg?.data?.[NameSpace];
+    if (Object(data) !== data || data.type !== type) return null;
+    return data;
+}
+
+export function data2Message<T = never>(data: T) {
     return {
-        [NameSpace]: msg,
+        [NameSpace]: data,
     };
-}
-
-export function message2UnrefData(data: any): UnrefData | null {
-    const ns = data?.[NameSpace] || data?.data?.[NameSpace];
-    if (Object(ns) !== ns) {
-        return null;
-    }
-    if (ns.type !== 'unref') {
-        return null;
-    }
-    if (typeof ns.funId !== 'string') {
-        return null;
-    }
-    return ns;
-}
-
-export function message2CallData(data: any): CallData | null {
-    const ns = data?.[NameSpace] || data?.data?.[NameSpace];
-    if (Object(ns) !== ns) {
-        return null;
-    }
-    if (ns.type !== 'call') {
-        return null;
-    }
-    if (typeof ns.funId !== 'string') {
-        return null;
-    }
-    if (!Array.isArray(ns.args)) {
-        return null;
-    }
-    return ns;
 }

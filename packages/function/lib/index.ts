@@ -1,5 +1,5 @@
 import type { Deserializer, Serializer } from 'json-serialization';
-import { CallData, Channel, data2Message, message2CallData, message2UnrefData, UnrefData } from './message';
+import { CallData, Channel, data2Message, message2Data, UnrefData } from './message';
 import { uuid } from './uuid';
 
 type FunctionSerDes = {
@@ -135,7 +135,7 @@ export function createFunctionSerDes(channel: Channel): FunctionSerDes {
             });
         }
 
-        const callData = message2CallData(data);
+        const callData = message2Data<CallData>(data, 'call');
         if (callData) {
             const fun = id2originalFunctionMap.get(callData.funId);
             if (fun) {
@@ -144,7 +144,7 @@ export function createFunctionSerDes(channel: Channel): FunctionSerDes {
             return;
         }
 
-        const unrefData = message2UnrefData(data);
+        const unrefData = message2Data<UnrefData>(data, 'unref');
         if (unrefData) {
             const funId = unrefData.funId;
             id2originalFunctionMap.delete(funId);

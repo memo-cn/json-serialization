@@ -1,6 +1,23 @@
 import type { Deserializer, Serializer } from 'json-serialization';
-import { CallData, Channel, data2Message, message2CallData, message2UnrefData, UnrefData } from './message.ts';
-import { uuid } from './uuid.ts';
+import { CallData, Channel, data2Message, message2CallData, message2UnrefData, UnrefData } from './message';
+import { uuid } from './uuid';
+
+type FunctionSerDes = {
+    serializer: Serializer;
+    deserializer: Deserializer;
+    /**
+     * unreference a function
+     * 取消函数引用
+     *
+     * @desc after unreferencing, the callback function will no longer be triggered.
+     * @desc 取消后, 回调函数将不再被触发。
+     *
+     * @param fun
+     *   The function to be unreferenced
+     *   需要取消引用的函数
+     */
+    unref(fun: (...args: any[]) => any): boolean;
+};
 
 /**
  * @desc create function serializer and deserializer
@@ -15,7 +32,7 @@ import { uuid } from './uuid.ts';
  *   The channel used internally for transmitting call messages.
  *   内部用于传输调用消息的信道。
  */
-export function createFunctionSerDes(channel: Channel) {
+export function createFunctionSerDes(channel: Channel): FunctionSerDes {
     const serializer: Serializer = {
         test(value) {
             if (typeof value === 'string') return true;
@@ -25,10 +42,10 @@ export function createFunctionSerDes(channel: Channel) {
             if (typeof fun === 'string') {
                 return 's' + fun;
             }
-            if (typeof fun !== 'function') {
-                return fun;
+            if (typeof fun === 'function') {
+                return `f${originalFunction2Id(fun)}`;
             }
-            return `f${originalFunction2Id(fun)}`;
+            return fun;
         },
     };
 
@@ -91,10 +108,26 @@ export function createFunctionSerDes(channel: Channel) {
     const proxyFunction2idMap = new WeakMap<(...args: any[]) => void>();
     const id2proxyFunctionMap = new Map<string, (...args: any[]) => void>();
 
+    function unref(fun: (...args: any[]) => any) {
+        const funId = originalFunction2idMap.get(fun) || proxyFunction2idMap.get(fun);
+        if (funId) {
+            id2originalFunctionMap.delete(funId);
+            id2proxyFunctionMap.delete(funId);
+            channel.postMessage(
+                data2Message<UnrefData>({
+                    type: 'unref',
+                    funId,
+                }),
+            );
+            return true;
+        }
+        return false;
+    }
+
     /************************** ***** **************************/
 
     const originalOnMessage: any = channel.onmessage;
-    channel.onmessage = async function (data: any) {
+    channel.onmessage = function (data: any) {
         // 如果原来存在监听器, 对其进行调用。
         if (originalOnMessage) {
             setTimeout(() => {
@@ -120,33 +153,8 @@ export function createFunctionSerDes(channel: Channel) {
     };
 
     return {
-        /**
-         * unreference a function
-         * 取消函数引用
-         *
-         * @desc after unreference, the callback function will no longer be triggered.
-         * @desc 取消后, 回调函数将不再被触发。
-         *
-         * @param fun
-         *   The function to be unreferenced
-         *   需要取消引用的函数
-         */
-        unref(fun: (...args: any[]) => any) {
-            const funId = originalFunction2idMap.get(fun) || proxyFunction2idMap.get(fun);
-            if (funId) {
-                id2originalFunctionMap.delete(funId);
-                id2proxyFunctionMap.delete(funId);
-                channel.postMessage(
-                    data2Message<UnrefData>({
-                        type: 'unref',
-                        funId,
-                    }),
-                );
-                return true;
-            }
-            return false;
-        },
         serializer,
         deserializer,
+        unref,
     };
 }

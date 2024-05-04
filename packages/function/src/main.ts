@@ -45,10 +45,10 @@ var object = await parse(json, [serverSerDes.deserializer]);
 object[0].eat('fish');
 
 // unreferencing function on the client
-clientSerDes.unref(animal.eat);
+clientSerDes.unref(animal.sleep);
 
 // or unreferencing function on the server
-serverSerDes.unref(object[1]);
+serverSerDes.unref(object[2]);
 
 // console has no output
-object[0].eat('fish');
+object[0].sleep('2h');

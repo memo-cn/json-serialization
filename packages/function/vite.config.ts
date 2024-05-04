@@ -1,13 +1,9 @@
 import { defineConfig } from 'vite';
-import dts from 'vite-plugin-dts';
 import { resolve } from 'path';
 import { name } from './package.json';
 
 export default defineConfig({
     plugins: [
-        dts({
-            include: ['./lib'],
-        }),
         {
             name: 'inject-title',
             apply: 'serve',

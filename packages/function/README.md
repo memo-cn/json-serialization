@@ -28,8 +28,7 @@ var animal = {
 };
 ```
 
-> Note: `@json-serialization/function` needs to be used in conjunction with `json-serialization`.
-> he latter is an extensible asynchronous JSON serialization library, you can first understand it through the <a href="https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.md">documentation</a>.
+> Note: `@json-serialization/function` needs to be used in conjunction with `json-serialization`. This is an extensible asynchronous JSON serialization library. You can get to know it by reading [this document](https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.zh-CN.md).
 
 Suppose your current scenario is to serialize functions defined on the client side and then transmit them to the server side via WebSocket.
 

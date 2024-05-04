@@ -28,8 +28,7 @@ var animal = {
 };
 ```
 
-> 提示: `@json-serialization/function` 需要配合 `json-serialization` 使用。
-> 后者是一个可扩展的异步 JSON 序列化库，你可以先通过<a href="https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.zh-CN.md">文档</a>了解一下。
+> 提示: `@json-serialization/function` 需要配合 `json-serialization` 使用。这是一个可扩展的异步 JSON 序列化库，你可以通过阅读[这篇文档](https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.zh-CN.md)对其有所了解。
 
 假设你现在的场景是需要将定义在客户端的函数序列化，然后通过 WebSocket 传输到服务端。
 
@@ -44,7 +43,7 @@ var clientSerDes = createFunctionSerDes(clientSocket);
 var jsonText = await stringify([animal, animal.eat, animal.sleep], [clientSerDes.serializer], 4);
 ```
 
-`@json-serialization/function` 提供的 `createFunctionSerDes` 是一个工厂函数, 入参是一个实现了 `onmessage` 和 `postMessage` 方法的信道对象, 返回一对序列化器和反序列化器。
+`@json-serialization/function` 提供的 `createFunctionSerDes` 是一个工厂函数，入参是一个实现了 `onmessage` 和 `postMessage` 方法的信道对象，返回一对序列化器和反序列化器。
 
 序列化后的 `jsonText` 可能为:
 
@@ -97,14 +96,13 @@ var object = await parse(jsonText, [serverSerDes.deserializer]);
 object[0].eat('fish');
 ```
 
-对于开发者来说，对反序列化出的代理函数的调用会被转发为对原始函数的调用，这一过程仿佛将函数在不同执行上下文之间进行了透明的序列化与反序列化。
+对于开发者来说，对反序列化出的代理函数的调用会被转发为对原始函数的调用，这一过程仿佛将函数在不同执行上下文之间进行了透明地序列化与反序列化。
 
 ### 注意事项
 
-为了避免造成内存泄漏, 建议在业务逻辑执行完成后, 通过 `FunctionSerDes` 提供的 `unref` 方法来移除对函数的引用,
-之后对代理函数调用也将不会再被转发至原函数。
+为了避免造成内存泄漏，建议在业务逻辑执行完成后，通过 `FunctionSerDes` 提供的 `unref` 方法来移除对函数的引用，之后对代理函数调用也将不会再被转发至原函数。
 
-在服务端或客户端任意一方调用即可, 析构指令会自动同步到另一方。
+在服务端或客户端任意一方调用即可，析构指令会自动同步到另一方。
 
 ```ts
 // unreferencing function on the client

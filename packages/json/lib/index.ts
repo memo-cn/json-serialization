@@ -42,7 +42,7 @@ export type Deserializer = {
  * @param {Deserializer[]} [deserializerList] - An optional list of deserializers to use. 可选的反序列化器列表。
  * @returns {Promise<any>} The parsed object. 解析后的对象。
  */
-export async function parse(text: string, deserializerList?: Deserializer[]): Promise<any> {
+export function parse(text: string, deserializerList?: Deserializer[]): Promise<any> {
     if (!deserializerList || deserializerList.length === 0) {
         return JSON.parse(text);
     }
@@ -56,28 +56,44 @@ export async function parse(text: string, deserializerList?: Deserializer[]): Pr
             return value2deserialized.get(value);
         }
 
-        const promise = new Promise<any>(async (resolve) => {
-            let deserializedValue = await value;
+        const promise = new Promise<any>(async (resolve, reject) => {
+            try {
+                let deserializedValue = await value;
 
-            if (Object(deserializedValue) === deserializedValue) {
-                for (let [k, v] of Object.entries(deserializedValue)) {
-                    deserializedValue[k] = await v;
+                {
+                    let error;
+                    let hasError = false;
+                    if (Object(deserializedValue) === deserializedValue) {
+                        for (let [k, v] of Object.entries(deserializedValue)) {
+                            try {
+                                deserializedValue[k] = await v;
+                            } catch (e) {
+                                // 遇到被拒绝的 v 时, 仍然需要继续处理其他 v, 而不是立即抛出第一个错误。否则, 控制台会提示 Uncaught (in promise)
+                                if (!hasError) {
+                                    hasError = true;
+                                    error = e;
+                                }
+                            }
+                        }
+                    }
+                    if (hasError) throw error;
                 }
-            }
 
-            const firstIndex = deserializerList.findIndex((r) => r.test(value, key));
+                const firstIndex = deserializerList.findIndex((r) => r.test(value, key));
 
-            if (firstIndex !== -1) {
-                for (let i = firstIndex; i < deserializerList.length; i++) {
-                    const r = deserializerList[i];
-                    if (firstIndex === i || r.test(deserializedValue, key)) {
-                        deserializedValue = await r.deserialize(deserializedValue, key);
+                if (firstIndex !== -1) {
+                    for (let i = firstIndex; i < deserializerList.length; i++) {
+                        const r = deserializerList[i];
+                        if (firstIndex === i || r.test(deserializedValue, key)) {
+                            deserializedValue = await r.deserialize(deserializedValue, key);
+                        }
                     }
                 }
-                value2deserialized.set(value, deserializedValue);
-            }
 
-            resolve(deserializedValue);
+                resolve(deserializedValue);
+            } catch (e) {
+                reject(e);
+            }
         });
 
         value2deserialized.set(value, promise);

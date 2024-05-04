@@ -15,25 +15,25 @@ importers:
   packages/function:
     devDependencies:
       '@babel/preset-env':
-        specifier: ^7.22.10
+        specifier: ^7.24.5
         version: 7.24.5(@babel/core@7.24.5)
       '@rollup/plugin-babel':
-        specifier: ^6.0.3
+        specifier: ^6.0.4
         version: 6.0.4(@babel/core@7.24.5)(rollup@4.17.2)
       '@rollup/plugin-commonjs':
-        specifier: ^25.0.4
+        specifier: ^25.0.7
         version: 25.0.7(rollup@4.17.2)
       '@rollup/plugin-json':
-        specifier: ^6.0.0
+        specifier: ^6.1.0
         version: 6.1.0(rollup@4.17.2)
       '@rollup/plugin-node-resolve':
-        specifier: ^15.2.1
+        specifier: ^15.2.3
         version: 15.2.3(rollup@4.17.2)
       '@rollup/plugin-replace':
-        specifier: ^5.0.2
+        specifier: ^5.0.5
         version: 5.0.5(rollup@4.17.2)
       '@rollup/plugin-terser':
-        specifier: ^0.4.3
+        specifier: ^0.4.4
         version: 0.4.4(rollup@4.17.2)
       '@types/node':
         specifier: ^20.12.8
@@ -42,22 +42,22 @@ importers:
         specifier: ^0.0.2
         version: 0.0.2
       rimraf:
-        specifier: ^5.0.1
+        specifier: ^5.0.5
         version: 5.0.5
       rollup:
         specifier: ^4.17.2
         version: 4.17.2
       rollup-plugin-dts:
-        specifier: ^6.0.0
+        specifier: ^6.1.0
         version: 6.1.0(rollup@4.17.2)(typescript@5.4.5)
       rollup-plugin-typescript2:
-        specifier: ^0.35.0
-        version: 0.35.0(rollup@4.17.2)(typescript@5.4.5)
+        specifier: ^0.36.0
+        version: 0.36.0(rollup@4.17.2)(typescript@5.4.5)
       typescript:
         specifier: ^5.4.5
         version: 5.4.5
       vite:
-        specifier: ^5.2.10
+        specifier: ^5.2.11
         version: 5.2.11(@types/node@20.12.8)(terser@5.31.0)
 
   packages/json:
@@ -1518,8 +1518,8 @@ packages:
       rollup: ^3.29.4 || ^4
       typescript: ^4.5 || ^5.0
 
-  rollup-plugin-typescript2@0.35.0:
-    resolution: {integrity: sha512-szcIO9hPUx3PhQl91u4pfNAH2EKbtrXaES+m163xQVE5O1CC0ea6YZV/5woiDDW3CR9jF2CszPrKN+AFiND0bg==}
+  rollup-plugin-typescript2@0.36.0:
+    resolution: {integrity: sha512-NB2CSQDxSe9+Oe2ahZbf+B4bh7pHwjV5L+RSYpCu7Q5ROuN94F9b6ioWwKfz3ueL3KTtmX4o2MUH2cgHDIEUsw==}
     peerDependencies:
       rollup: '>=1.26.3'
       typescript: '>=2.4.0'
@@ -3247,7 +3247,7 @@ snapshots:
     optionalDependencies:
       '@babel/code-frame': 7.24.2
 
-  rollup-plugin-typescript2@0.35.0(rollup@4.17.2)(typescript@5.4.5):
+  rollup-plugin-typescript2@0.36.0(rollup@4.17.2)(typescript@5.4.5):
     dependencies:
       '@rollup/pluginutils': 4.2.1
       find-cache-dir: 3.3.2

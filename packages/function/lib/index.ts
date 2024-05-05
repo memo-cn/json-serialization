@@ -1,5 +1,5 @@
 import type { Deserializer, Serializer } from 'json-serialization';
-import { CallData, Channel, data2Message, message2Data, UnrefData } from './message';
+import { CallData, Channel, data2Message, message2Data, UnrefAllData, UnrefData } from './message';
 import { uuid } from './uuid';
 
 type FunctionSerDes = {
@@ -16,7 +16,13 @@ type FunctionSerDes = {
      *   The function to be unreferenced
      *   需要取消引用的函数
      */
-    unref(fun: (...args: any[]) => any): boolean;
+    unref: (fun: (...args: any[]) => any) => boolean;
+
+    /**
+     * unreference all functions
+     * 取消所有函数引用
+     */
+    unrefAll: () => void;
 };
 
 /**
@@ -124,6 +130,16 @@ export function createFunctionSerDes(channel: Channel): FunctionSerDes {
         return false;
     }
 
+    function unrefAll() {
+        id2originalFunctionMap.clear();
+        id2proxyFunctionMap.clear();
+        channel.postMessage(
+            data2Message<UnrefAllData>({
+                type: 'unrefAll',
+            }),
+        );
+    }
+
     /************************** ***** **************************/
 
     const originalOnMessage: any = channel.onmessage;
@@ -149,6 +165,14 @@ export function createFunctionSerDes(channel: Channel): FunctionSerDes {
             const funId = unrefData.funId;
             id2originalFunctionMap.delete(funId);
             id2proxyFunctionMap.delete(funId);
+            return;
+        }
+
+        const unrefAllData = message2Data<UnrefAllData>(data, 'unrefAll');
+        if (unrefAllData) {
+            id2originalFunctionMap.clear();
+            id2proxyFunctionMap.clear();
+            return;
         }
     };
 
@@ -156,5 +180,6 @@ export function createFunctionSerDes(channel: Channel): FunctionSerDes {
         serializer,
         deserializer,
         unref,
+        unrefAll,
     };
 }

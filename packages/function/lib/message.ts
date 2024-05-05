@@ -16,6 +16,10 @@ export type UnrefData = {
     funId: string;
 };
 
+export type UnrefAllData = {
+    type: 'unrefAll';
+};
+
 export function message2Data<D extends { type: string } = never>(msg: any, type: D['type']): D | null {
     const data = msg?.[NameSpace] || msg?.data?.[NameSpace];
     if (Object(data) !== data || data.type !== type) return null;

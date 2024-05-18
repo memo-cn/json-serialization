@@ -1,0 +1,68 @@
+{
+    "name": "@json-serialization/binary",
+    "private": false,
+    "version": "0.0.1",
+    "description": "@json-serialization/binary provides a binary serialization and deserialization mechanism, supporting ArrayBuffer, Buffer, Blob, File, Uint8Array these data types. @json-serialization/binary 提供了一种二进制序列化和反序列化的机制，支持 ArrayBuffer、Buffer、Blob、File、Uint8Array 这些数据类型。",
+    "keywords": [
+        "binary",
+        "serialization"
+    ],
+    "homepage": "https://github.com/memo-cn/json-serialization/tree/main/packages/binary#readme",
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "require": "./dist/index.cjs",
+            "import": "./dist/index.mjs",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "scripts": {
+        "dev": "vite",
+        "build": "rimraf ./dist/* && rollup -c --configPlugin rollup-plugin-typescript2"
+    },
+    "devDependencies": {
+        "@babel/preset-env": "^7.24.5",
+        "@rollup/plugin-babel": "^6.0.4",
+        "@rollup/plugin-commonjs": "^25.0.7",
+        "@rollup/plugin-json": "^6.1.0",
+        "@rollup/plugin-node-resolve": "^15.2.3",
+        "@rollup/plugin-replace": "^5.0.5",
+        "@rollup/plugin-terser": "^0.4.4",
+        "@types/node": "^20.12.8",
+        "rimraf": "^5.0.5",
+        "json-serialization": "^0.0.3",
+        "rollup": "^4.17.2",
+        "rollup-plugin-dts": "^6.1.0",
+        "rollup-plugin-typescript2": "^0.36.0",
+        "typescript": "^5.4.5",
+        "vite": "^5.2.11"
+    },
+    "files": [
+        "dist",
+        "CHANGELOG.md",
+        "LICENSE",
+        "package.json",
+        "README.md",
+        "README.zh-CN.md"
+    ],
+    "author": {
+        "name": "memo",
+        "email": "i@memo.cool"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:memo-cn/json-serialization.git"
+    },
+    "bugs": {
+        "email": "i@memo.cool",
+        "url": "https://github.com/memo-cn/json-serialization/issues"
+    },
+    "publishConfig": {
+        "access": "public",
+        "registry": "https://registry.npmjs.org"
+    },
+    "license": "MIT"
+}

@@ -1,13 +1,31 @@
 import { defineConfig } from 'vite';
-import dts from 'vite-plugin-dts';
 import { resolve } from 'path';
 import { name } from './package.json';
+import { binaryDeserializer, binarySerializer } from './lib/index';
+// import { parse, stringify } from 'json-serialization';
+import { parse, stringify } from '../json/lib';
+import { readFileSync } from 'fs';
 
 export default defineConfig({
     plugins: [
-        dts({
-            include: ['./lib'],
-        }),
+        {
+            name: 'binary-serializer-demo',
+            apply: 'serve',
+            configureServer(viteDevServer) {
+                viteDevServer.hot.on('json', async (oldJson) => {
+                    // console.log(json);
+                    var obj = await parse(oldJson, [binaryDeserializer]);
+                    if (Object(obj) === obj) {
+                        obj.CHANGELOG = readFileSync('./CHANGELOG.md');
+                    }
+                    var newJson = await stringify(obj, [binarySerializer], 4);
+                    console.log('obj:', obj);
+                    // console.log('json:', newJson);
+
+                    viteDevServer.hot.send('json', newJson);
+                });
+            },
+        },
         {
             name: 'inject-title',
             apply: 'serve',

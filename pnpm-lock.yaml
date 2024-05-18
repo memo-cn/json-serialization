@@ -87,8 +87,8 @@ importers:
         specifier: ^20.12.8
         version: 20.12.8
       json-serialization:
-        specifier: ^0.0.2
-        version: 0.0.2
+        specifier: ^0.0.3
+        version: 0.0.3
       rimraf:
         specifier: ^5.0.5
         version: 5.0.5
@@ -1385,9 +1385,6 @@ packages:
 
   json-schema-traverse@0.4.1:
     resolution: {integrity: sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg==}
-
-  json-serialization@0.0.2:
-    resolution: {integrity: sha512-5Xm3ttLRkrjzv+vrJRjZ3Z4TrxAn0xU/6w0tYzs/y558GMH6S5yDTdeDaxW5XV+UF5yRY4WcIdsTmgH/oWfFRw==}
 
   json-serialization@0.0.3:
     resolution: {integrity: sha512-d0QXOKW5opdjpKDqx2/JWPhlpFt0rIKgtm/7oRHgKSe9WwFxsJXUVBHeMJQXWtx46qIeHm6wY9qilCYxKeut8w==}
@@ -3132,8 +3129,6 @@ snapshots:
   jsesc@2.5.2: {}
 
   json-schema-traverse@0.4.1: {}
-
-  json-serialization@0.0.2: {}
 
   json-serialization@0.0.3: {}
 

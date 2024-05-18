@@ -2,7 +2,9 @@ import type { Deserializer, Serializer } from 'json-serialization';
 import { CallData, Channel, data2Message, message2Data, UnrefAllData, UnrefData } from './message';
 import { uuid } from './uuid';
 
-type FunctionSerDes = {
+export { type Channel };
+
+export type FunctionSerDes = {
     serializer: Serializer;
     deserializer: Deserializer;
     /**
@@ -39,39 +41,28 @@ type FunctionSerDes = {
  *   内部用于传输调用消息的信道。
  */
 export function createFunctionSerDes(channel: Channel): FunctionSerDes {
-    const serializer: Serializer = {
-        test(value) {
-            if (typeof value === 'string') return true;
-            if (typeof value === 'function') return true;
-        },
-        serialize(fun: string | ((...args: any[]) => any)) {
-            if (typeof fun === 'string') {
-                return 's' + fun;
-            }
-            if (typeof fun === 'function') {
-                return `f${originalFunction2Id(fun)}`;
-            }
-            return fun;
-        },
+    const serializer: Serializer = function (key, fun: string | ((...args: any[]) => any)) {
+        if (typeof fun === 'string') {
+            return 's' + fun;
+        }
+        if (typeof fun === 'function') {
+            return `f${originalFunction2Id(fun)}`;
+        }
+        return fun;
     };
 
-    const deserializer: Deserializer = {
-        test(value) {
-            if (typeof value === 'string') return true;
-        },
-        deserialize(str: string) {
-            if (typeof (str as any) !== 'string') {
-                return str;
-            }
-            if (str[0] === 's') {
-                return str.slice(1);
-            }
-            if (str[0] !== 'f') {
-                return str;
-            }
-            const funId = str.slice(1);
-            return id2ProxyFunction(funId);
-        },
+    const deserializer: Deserializer = function (key, str: string) {
+        if (typeof (str as any) !== 'string') {
+            return str;
+        }
+        if (str[0] === 's') {
+            return str.slice(1);
+        }
+        if (str[0] !== 'f') {
+            return str;
+        }
+        const funId = str.slice(1);
+        return id2ProxyFunction(funId);
     };
 
     /************************** ***** **************************/

@@ -4,16 +4,7 @@
  * @desc 类似于 JSON.stringify 的 replacer 参数
  */
 export type Serializer = {
-    /**
-     * @desc Preliminary test whether the value can be serialized, returns falsy then this serializer will not be used
-     * @desc 初步测试值是否可以被序列化，如果返回 falsy，则不会使用此序列化器
-     */
-    test: (value: any, key: string) => boolean | void | null | undefined;
-
-    /**
-     * 序列化
-     */
-    serialize: (value: any, key: string) => any | Promise<any>;
+    (key: string, value: any): any | Promise<any>;
 };
 
 /**
@@ -22,16 +13,7 @@ export type Serializer = {
  * @description 类似于 JSON.parse 的 reviver 参数
  */
 export type Deserializer = {
-    /**
-     * @desc Preliminary test whether the value can be deserialized, returns falsy then this deserializer will not be used
-     * @desc 初步测试值是否可以被反序列化，如果返回 falsy，则不会使用此反序列化器
-     */
-    test: (value: any, key: string) => boolean | void | null | undefined;
-
-    /**
-     * 反序列化
-     */
-    deserialize: (value: any, key: string) => any | Promise<any>;
+    (key: string, value: any): any | Promise<any>;
 };
 
 /**
@@ -79,15 +61,9 @@ export function parse(text: string, deserializerList?: Deserializer[]): Promise<
                     if (hasError) throw error;
                 }
 
-                const firstIndex = deserializerList.findIndex((r) => r.test(value, key));
-
-                if (firstIndex !== -1) {
-                    for (let i = firstIndex; i < deserializerList.length; i++) {
-                        const r = deserializerList[i];
-                        if (firstIndex === i || r.test(deserializedValue, key)) {
-                            deserializedValue = await r.deserialize(deserializedValue, key);
-                        }
-                    }
+                for (let i = 0; i < deserializerList.length; i++) {
+                    const deserializer = deserializerList[i];
+                    deserializedValue = await deserializer(key, deserializedValue);
                 }
 
                 resolve(deserializedValue);
@@ -133,16 +109,11 @@ export async function stringify(
         }
 
         let serializedValue = rawValue;
-        const firstIndex = serializerList.findIndex((r) => r.test(rawValue, key));
-        if (firstIndex !== -1) {
-            for (let i = firstIndex; i < serializerList.length; i++) {
-                const serializer = serializerList[i];
-                if (firstIndex === i || serializer.test(serializedValue, key)) {
-                    serializedValue = await serializer.serialize(serializedValue, key);
-                }
-            }
-            value2serialized.set(rawValue, serializedValue);
+        for (let i = 0; i < serializerList.length; i++) {
+            const serializer = serializerList[i];
+            serializedValue = await serializer(key, serializedValue);
         }
+        value2serialized.set(rawValue, serializedValue);
 
         if (typeof serializedValue !== 'function' && Object(serializedValue) === serializedValue) {
             valueQueue.push(...Object.entries(serializedValue));

@@ -1,37 +1,44 @@
 /**
  * Serializer 序列化器
- * @desc Similar to the replacer parameter of JSON.stringify
- * @desc 类似于 JSON.stringify 的 replacer 参数
+ * @description Similar to the replacer parameter of JSON.stringify. 类似于 JSON.stringify 的 replacer 参数。
+ * @param {string} key - The current key being processed. 当前正在处理的键。
+ * @param {any} value - The value associated with the key. 与该键关联的值。
+ * @returns {any | Promise<any>} The transformed value. 转换后的值。
  */
-export type Serializer = {
-    (key: string, value: any): any | Promise<any>;
-};
+export type Serializer = (this: any, key: string, value: any) => any | Promise<any>;
 
 /**
  * Deserializer 反序列化器
- * @description Similar to the reviver parameter of JSON.parse
- * @description 类似于 JSON.parse 的 reviver 参数
+ * @description Similar to the reviver parameter of JSON.parse. 类似于 JSON.parse 的 reviver 参数
+ * @param {string} key - The current key being processed. 当前正在处理的键。
+ * @param {any} value - The value associated with the key. 与该键关联的值。
+ * @returns {any | Promise<any>} The transformed value. 转换后的值。
  */
-export type Deserializer = {
-    (key: string, value: any): any | Promise<any>;
-};
+export type Deserializer = (this: any, key: string, value: any) => any | Promise<any>;
 
 /**
- * @desc Converts a string into an object using a list of deserializers, enhancing the native JSON.parse function.
- * @desc 使用一组反序列化器将字符串解析为对象，增强了原生的 JSON.parse 函数。
- *
+ * @description Converts a string into an object using a list of deserializers, enhancing the native JSON.parse function. 使用一组反序列化器将字符串解析为对象，增强了原生的 JSON.parse 函数。
  * @param {string} text - A valid JSON string. 一个有效的 JSON 字符串。
- * @param {Deserializer[]} [deserializerList] - An optional list of deserializers to use. 可选的反序列化器列表。
+ * @param {null | undefined | Deserializer | (null | undefined | Deserializer)[]} [deserializer] - Optional deserializer(s) to customize the parsing behavior. 可选的反序列化器以自定义序列化行为。
  * @returns {Promise<any>} The parsed object. 解析后的对象。
  */
-export function parse(text: string, deserializerList?: Deserializer[]): Promise<any> {
+export function parse(
+    text: string,
+    deserializer?: null | undefined | Deserializer | (null | undefined | Deserializer)[],
+): Promise<any> {
+    if (!Array.isArray(deserializer)) {
+        deserializer = [deserializer];
+    }
+
+    const deserializerList: Deserializer[] = deserializer?.filter((f) => typeof f === 'function') as Deserializer[];
+
     if (!deserializerList || deserializerList.length === 0) {
         return JSON.parse(text);
     }
 
     const value2deserialized = new Map<any, any>();
 
-    deserializerList = [...deserializerList].reverse();
+    deserializerList.reverse();
 
     return JSON.parse(text, function (key, value) {
         if (value2deserialized.has(value)) {
@@ -43,7 +50,7 @@ export function parse(text: string, deserializerList?: Deserializer[]): Promise<
                 let deserializedValue = await value;
 
                 {
-                    let error;
+                    let error: any;
                     let hasError = false;
                     if (Object(deserializedValue) === deserializedValue) {
                         for (let [k, v] of Object.entries(deserializedValue)) {
@@ -63,7 +70,7 @@ export function parse(text: string, deserializerList?: Deserializer[]): Promise<
 
                 for (let i = 0; i < deserializerList.length; i++) {
                     const deserializer = deserializerList[i];
-                    deserializedValue = await deserializer(key, deserializedValue);
+                    deserializedValue = await deserializer.bind(this)(key, deserializedValue);
                 }
 
                 resolve(deserializedValue);
@@ -78,29 +85,36 @@ export function parse(text: string, deserializerList?: Deserializer[]): Promise<
 }
 
 /**
- * @desc Converts a JavaScript value to a string using a list of serializers, enhancing the native JSON.stringify function.
- * @desc 使用一组序列化器将 JavaScript 值序列化为字符串，增强了原生的 JSON.stringify 函数。
+ * @description Converts a JavaScript value to a string using a list of serializers, enhancing the native JSON.stringify function. 使用一组序列化器将 JavaScript 值序列化为字符串，增强了原生的 JSON.stringify 函数。
  *
  * @param {any} value - The value to stringify. 需要序列化的值。
- * @param {Serializer[]} [serializerList] - An optional list of serializers to use. 可选的序列化器列表。
+ * @param serializer - An optional list of serializers to use. 可选的序列化器列表。
+ * @param {null | undefined | Serializer | (null | undefined | Serializer)[]} [serializer] - Optional serializer(s) to customize the serialization behavior. 可选的序列化器以自定义序列化行为。
  * @param {number} [space] - The number of spaces for indentation. 缩进的空格数。
  * @returns {Promise<string>} The stringified value. 序列化后的字符串。
  */
 export async function stringify(
     value: any,
-    serializerList?: null | undefined | Serializer[],
+    serializer?: null | undefined | Serializer | (null | undefined | Serializer)[],
     space?: number,
 ): Promise<string> {
+    if (!Array.isArray(serializer)) {
+        serializer = [serializer];
+    }
+
+    const serializerList: Serializer[] = serializer?.filter((f) => typeof f === 'function') as Serializer[];
+
     if (!serializerList || serializerList.length === 0) {
         return JSON.stringify(value, null, space);
     }
 
     const value2serialized = new Map<any, any>();
 
-    const valueQueue: [string, any][] = [['', value]];
+    // key, value, this
+    const valueQueue: [string, any, any][] = [['', value, { '': value }]];
 
     for (; valueQueue.length > 0; ) {
-        const [key, rawValue] = valueQueue.shift()!;
+        const [key, rawValue, that] = valueQueue.shift()!;
 
         if (value2serialized.has(rawValue)) {
             continue;
@@ -111,12 +125,14 @@ export async function stringify(
         let serializedValue = rawValue;
         for (let i = 0; i < serializerList.length; i++) {
             const serializer = serializerList[i];
-            serializedValue = await serializer(key, serializedValue);
+            serializedValue = await serializer.bind(that)(key, serializedValue);
         }
         value2serialized.set(rawValue, serializedValue);
 
         if (typeof serializedValue !== 'function' && Object(serializedValue) === serializedValue) {
-            valueQueue.push(...Object.entries(serializedValue));
+            for (let [key, val] of Object.entries(serializedValue)) {
+                valueQueue.push([key, val, serializedValue]);
+            }
         }
     }
 

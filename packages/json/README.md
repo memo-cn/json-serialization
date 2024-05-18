@@ -12,10 +12,10 @@
 
 `json-serialization` provides the following methods:
 
-| method      | function                                                                                                                                                                                                             |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `stringify` | converts a JavaScript value to a JSON string, optionally replacing values if a `serializerList` is specified.                                                                                                        |
-| `parse`     | parses a JSON string, constructing the JavaScript value or object described by the string. An optional `deserializerList` can be provided to perform a transformation on the resulting object before it is returned. |
+| method      | function                                                                                                                                                                                                         |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `stringify` | converts a JavaScript value to a JSON string, optionally replacing values if a `serializer` is specified.                                                                                                        |
+| `parse`     | parses a JSON string, constructing the JavaScript value or object described by the string. An optional `deserializer` can be provided to perform a transformation on the resulting object before it is returned. |
 
 ```ts
 import { stringify, parse } from 'json-serialization';
@@ -29,57 +29,51 @@ var object = await parse(json);
 
 ### Extending Serialization Rules
 
-`json-serialization` supports extending serialization and deserialization rules by implementing the `Serializer` and `Serializer` interface definitions.
+`json-serialization` supports extending serialization and deserialization rules by providing `Deserializer` and `Serializer` for customization.
 
 ```ts
-type Serializer = {
-    test: (value: any, key: string) => boolean;
-    serialize: (value: any, key: string) => any | Promise<any>;
-};
+type Serializer = (this: any, key: string, value: any) => any | Promise<any>;
+type Deserializer = (this: any, key: string, value: any) => any | Promise<any>;
 
-type Deserializer = {
-    test: (value: any, key: string) => boolean;
-    deserialize: (value: any, key: string) => any | Promise<any>;
-};
+function stringify(
+    value: any,
+    serializer?: null | undefined | Serializer | (null | undefined | Serializer)[],
+    space?: number,
+): Promise<string>;
+
+function parse(
+    text: string,
+    deserializer?: null | undefined | Deserializer | (null | undefined | Deserializer)[],
+): Promise<any>;
 ```
 
-The `test` method is used to preliminarily determine whether a value can be serialized or deserialized. If the `test` method always returns true, then:
-
-The `serialize` method is similar to the `replacer` parameter of `JSON.stringify`.
-
-The `deserialize` method is similar to the `reviver` parameter of `JSON.parse`.
+`Serializer` is similar to the `replacer` parameter of `JSON.stringify`, and `Deserializer` is similar to the `reviver` parameter of `JSON.parse`.
 
 The following example shows how to serialize a bigint into a string and how to deserialize it.
 
 ```ts
 import type { Serializer, Deserializer } from 'json-serialization';
 
-const BigIntSerializer: Serializer = {
-    test: (value) => typeof value === 'bigint' || typeof value === 'string',
-    serialize(value: bigint | string) {
-        switch (typeof value) {
-            case 'bigint':
-                return 'b' + String(value);
-            case 'string':
-                return 's' + value;
-            default:
-                return value;
-        }
-    },
+const BigIntSerializer: Serializer = function (key, value: bigint | string | any) {
+    switch (typeof value) {
+        case 'bigint':
+            return 'b' + String(value);
+        case 'string':
+            return 's' + value;
+        default:
+            return value;
+    }
 };
 
-const BigIntDeserializer: Deserializer = {
-    test: (value) => typeof value === 'string',
-    deserialize(value: string) {
-        switch (value[0]) {
-            case 's':
-                return value.slice(1);
-            case 'b':
-                return BigInt(value.slice(1));
-            default:
-                return value;
-        }
-    },
+const BigIntDeserializer: Deserializer = function (key, value: string) {
+    switch (value[0]) {
+        case 's':
+            return value.slice(1);
+        case 'b':
+            return BigInt(value.slice(1));
+        default:
+            return value;
+    }
 };
 ```
 
@@ -93,7 +87,7 @@ var json = await stringify({ name: 'memo', age: 18n }, [BigIntSerializer]);
 var object = await parse(json, [BigIntDeserializer]);
 ```
 
-When multiple serializers or deserializers meet the running conditions, they will be called in series (the return value of the previous serializer is used as the parameter of the next serializer).
+When multiple serializers or deserializers are specified, they will be called serially (the return value of the previous serializer is used as the input parameter of the next serializer).
 
 Please ensure that the order of the same group of serializers and deserializers is consistent in the two lists.
 

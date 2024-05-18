@@ -1,7 +1,7 @@
 {
     "name": "json-serialization",
     "private": false,
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "json-serialization is an extensible asynchronous JSON serialization library. json-serialization 是一个可扩展的异步 JSON 序列化库。",
     "keywords": [
         "extensible",

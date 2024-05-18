@@ -1,7 +1,7 @@
 {
     "name": "@json-serialization/binary",
     "private": false,
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "@json-serialization/binary provides a binary serialization and deserialization mechanism, supporting ArrayBuffer, Buffer, Blob, File, Uint8Array these data types. @json-serialization/binary 提供了一种二进制序列化和反序列化的机制，支持 ArrayBuffer、Buffer、Blob、File、Uint8Array 这些数据类型。",
     "keywords": [
         "binary",

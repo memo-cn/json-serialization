@@ -12,6 +12,8 @@
 
 -   Considering that `Buffer` is not supported in a web environment, `Blob` and `File` may not be supported in lower versions of Node.js environment. During deserialization, `@json-serialization/binary` may convert these three data types to and from each other to ensure adaptation to the running environment.
 
+-   In order to prevent `Buffer` from being preprocessed by `JSON.stringify`, `@json-serialization/binary` will internally set the `toJSON` attribute on the `Buffer` object instance, with the value set to `null`. Please pay attention to and handle the possible Influence.
+
 ## License
 
 [MIT](./LICENSE)

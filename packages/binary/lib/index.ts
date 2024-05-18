@@ -46,45 +46,24 @@ export const binarySerializer: Serializer = async function (key, value) {
     if (Object(value) === value) {
         if (supportBuffer) {
             if (!(value instanceof Buffer)) {
-                const keys = Object.keys(value);
-                const firstIndex = keys.findIndex((key) => value[key] instanceof Buffer);
-                if (firstIndex !== -1) {
-                    const skipKeys = new Set<string>();
-                    const newValue: any = Array.isArray(value) ? [] : {};
-                    for (let i = 0; i < keys.length; i++) {
-                        const k = keys[i];
-                        const val = value[k];
-                        if (val instanceof Buffer) {
-                            newValue[k] = await serialize(value, k, val);
-                            skipKeys.add(k);
-                        } else {
-                            newValue[k] = val;
-                        }
+                Object.values(value).forEach((val) => {
+                    if (val instanceof Buffer) {
+                        Reflect.defineProperty(val, 'toJSON', {
+                            enumerable: false,
+                            configurable: true,
+                            value: null,
+                        });
                     }
-                    objectToSkipKeys.set(newValue, skipKeys);
-                    return newValue;
-                }
+                });
             }
         }
     }
-    return serialize(this, key, value);
+    return serialize(value);
 };
 
 /** ---------------------------------------------------------------------------------- */
 
-const objectToSkipKeys = new WeakMap<any, Set<string>>();
-
-async function serialize(
-    object: any,
-    key: string,
-    value: string | File | Blob | Buffer | ArrayBuffer | Uint8Array | any,
-): Promise<string> {
-    if (Object(object) === object) {
-        const skipKeys = objectToSkipKeys.get(object);
-        if (skipKeys?.has(key)) {
-            return value;
-        }
-    }
+async function serialize(value: string | File | Blob | Buffer | ArrayBuffer | Uint8Array | any): Promise<string> {
     if (typeof value === 'string') {
         return 's' + value;
     }

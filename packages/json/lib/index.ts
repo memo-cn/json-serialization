@@ -118,8 +118,6 @@ export async function stringify(
 
         if (value2serialized.has(rawValue)) {
             continue;
-        } else {
-            value2serialized.set(rawValue, rawValue);
         }
 
         let serializedValue = rawValue;
@@ -136,14 +134,12 @@ export async function stringify(
         }
     }
 
-    return JSON.stringify(
-        value,
-        (key, value) => {
-            if (value2serialized.has(value)) {
-                return value2serialized.get(value);
-            }
-            return value;
-        },
-        space,
-    );
+    function getSerialized(value: any) {
+        if (value2serialized.has(value)) {
+            return value2serialized.get(value);
+        }
+        return value;
+    }
+
+    return JSON.stringify(getSerialized(value), (key, value) => getSerialized(value), space);
 }

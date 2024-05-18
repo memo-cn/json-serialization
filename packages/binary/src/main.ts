@@ -19,14 +19,14 @@ async function main() {
 
     var newObject = await parse(json, [binaryDeserializer]);
 
-    console.log('demo1:', newObject);
+    console.dir(newObject);
 
     import.meta.hot!.send('json', json);
 
     import.meta.hot!.on('json', async (json) => {
         try {
             var obj = await parse(json, [binaryDeserializer]);
-            console.log('demo2', obj);
+            console.dir(obj);
         } catch (e) {
             console.error(e);
         }

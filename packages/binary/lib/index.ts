@@ -38,71 +38,89 @@ let supportBlob = typeof Blob === 'function';
 // 当前环境支持 File
 let supportFile = typeof File === 'function';
 
-/**
- * 阻止 Buffer 被 JSON.stringify 预处理
- */
-if (supportBuffer) {
-    Buffer.prototype.toJSON = null;
-}
+// 二进制反序列化器
+export const binaryDeserializer: Deserializer = (key, value) => deserialize(value);
 
 // 二进制序列化器
-export const binarySerializer: Serializer = {
-    test(value: any) {
-        if (typeof value === 'string') return true;
-        if (supportFile && value instanceof File) return true;
-        if (supportBlob && value instanceof Blob) return true;
-        if (supportBuffer && value instanceof Buffer) return true;
-        if (value instanceof Uint8Array) return true;
-        if (value instanceof ArrayBuffer) return true;
-    },
-    serialize,
-};
-
-// 二进制反序列化器
-export const binaryDeserializer: Deserializer = {
-    test: (value: any) => typeof value === 'string',
-    deserialize,
+export const binarySerializer: Serializer = async function (key, value) {
+    if (Object(value) === value) {
+        if (supportBuffer) {
+            if (!(value instanceof Buffer)) {
+                const keys = Object.keys(value);
+                const firstIndex = keys.findIndex((key) => value[key] instanceof Buffer);
+                if (firstIndex !== -1) {
+                    const skipKeys = new Set<string>();
+                    const newValue: any = Array.isArray(value) ? [] : {};
+                    for (let i = 0; i < keys.length; i++) {
+                        const k = keys[i];
+                        const val = value[k];
+                        if (val instanceof Buffer) {
+                            newValue[k] = await serialize(value, k, val);
+                            skipKeys.add(k);
+                        } else {
+                            newValue[k] = val;
+                        }
+                    }
+                    objectToSkipKeys.set(newValue, skipKeys);
+                    return newValue;
+                }
+            }
+        }
+    }
+    return serialize(this, key, value);
 };
 
 /** ---------------------------------------------------------------------------------- */
 
-async function serialize(arg: string | File | Blob | Buffer | ArrayBuffer | Uint8Array): Promise<string> {
-    if (typeof arg === 'string') {
-        return 's' + arg;
+const objectToSkipKeys = new WeakMap<any, Set<string>>();
+
+async function serialize(
+    object: any,
+    key: string,
+    value: string | File | Blob | Buffer | ArrayBuffer | Uint8Array | any,
+): Promise<string> {
+    if (Object(object) === object) {
+        const skipKeys = objectToSkipKeys.get(object);
+        if (skipKeys?.has(key)) {
+            return value;
+        }
+    }
+    if (typeof value === 'string') {
+        return 's' + value;
     }
     let binaryJson: BinaryJson;
-    if (supportFile && arg instanceof File) {
+    if (supportFile && value instanceof File) {
         binaryJson = {
             __type: 'File',
-            __data: await blob__To__uint8String(arg),
-            type: arg.type,
-            name: arg.name,
-            lastModified: arg.lastModified,
-            webkitRelativePath: arg.webkitRelativePath,
+            __data: await blob_To_uint8String(value),
+            type: value.type,
+            name: value.name,
+            lastModified: value.lastModified,
+            webkitRelativePath: value.webkitRelativePath,
         };
-    } else if (supportBlob && arg instanceof Blob) {
+    } else if (supportBlob && value instanceof Blob) {
         binaryJson = {
             __type: 'Blob',
-            __data: await blob__To__uint8String(arg),
-            type: arg.type,
+            __data: await blob_To_uint8String(value),
+            type: value.type,
         };
-    } else if (supportBuffer && arg instanceof Buffer) {
+    } else if (supportBuffer && value instanceof Buffer) {
         binaryJson = {
             __type: 'Buffer',
-            __data: buffer__To__unit8String(arg),
+            __data: buffer_To_unit8String(value),
         };
-    } else if (arg instanceof Uint8Array) {
+    } else if (value instanceof Uint8Array) {
         binaryJson = {
             __type: 'Uint8Array',
-            __data: uint8Array__To__uint8String(arg),
+            __data: uint8Array_To_uint8String(value),
         };
-    } else if (arg instanceof ArrayBuffer) {
+    } else if (value instanceof ArrayBuffer) {
         binaryJson = {
             __type: 'ArrayBuffer',
-            __data: arrayBuffer__To__uint8String(arg),
+            __data: arrayBuffer_To_uint8String(value),
         };
     } else {
-        return arg as any;
+        return value as any;
     }
     return 'b' + JSON.stringify(binaryJson);
 }
@@ -136,15 +154,15 @@ function deserialize(arg: string): any {
     }
 
     if (bufferJson) {
-        return uint8String__To__buffer(bufferJson.__data);
+        return uint8String_To_buffer(bufferJson.__data);
     }
 
     if (blobJson) {
-        return uint8String__To__blob(blobJson.__data, { type: blobJson.type });
+        return uint8String_To_blob(blobJson.__data, { type: blobJson.type });
     }
 
     if (fileJson) {
-        const file = new File([uint8String__To__blob(fileJson.__data)], fileJson.name, {
+        const file = new File([uint8String_To_blob(fileJson.__data)], fileJson.name, {
             type: fileJson.type,
             lastModified: fileJson.lastModified,
         });
@@ -159,11 +177,11 @@ function deserialize(arg: string): any {
     }
 
     if (uint8ArrayJson) {
-        return uint8String__To__uint8Array(uint8ArrayJson.__data);
+        return uint8String_To_uint8Array(uint8ArrayJson.__data);
     }
 
     if (arrayBufferJson) {
-        return uint8String__To__arrayBuffer(arrayBufferJson.__data);
+        return uint8String_To_arrayBuffer(arrayBufferJson.__data);
     }
 }
 
@@ -210,11 +228,11 @@ type FileJson = BinaryJsonBase & {
 
 /** ---------------------------------------------------------------------------------- */
 
-function uint8Array__To__uint8String(uint8Array: Uint8Array): string {
+function uint8Array_To_uint8String(uint8Array: Uint8Array): string {
     return Array.prototype.map.call(uint8Array, (byte) => String.fromCharCode(byte)).join('');
 }
 
-function uint8String__To__uint8Array(uint8string: string): Uint8Array {
+function uint8String_To_uint8Array(uint8string: string): Uint8Array {
     const uint8Array = new Uint8Array(uint8string.length);
     for (let i = 0; i < uint8string.length; i++) {
         uint8Array[i] = uint8string.charCodeAt(i);
@@ -222,21 +240,21 @@ function uint8String__To__uint8Array(uint8string: string): Uint8Array {
     return uint8Array;
 }
 
-async function blob__To__uint8String(blob: Blob): Promise<string> {
+async function blob_To_uint8String(blob: Blob): Promise<string> {
     const arrayBuffer = await blob.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
-    return uint8Array__To__uint8String(uint8Array);
+    return uint8Array_To_uint8String(uint8Array);
 }
 
-function uint8String__To__blob(uint8string: string, options?: BlobPropertyBag): Blob {
-    return new Blob([uint8String__To__uint8Array(uint8string).buffer], options);
+function uint8String_To_blob(uint8string: string, options?: BlobPropertyBag): Blob {
+    return new Blob([uint8String_To_uint8Array(uint8string).buffer], options);
 }
 
-function buffer__To__unit8String(buffer: Buffer) {
+function buffer_To_unit8String(buffer: Buffer) {
     return Array.prototype.map.call(buffer, (byte) => String.fromCharCode(byte)).join('');
 }
 
-function uint8String__To__buffer(uint8string: string): Buffer {
+function uint8String_To_buffer(uint8string: string): Buffer {
     const buffer = Buffer.allocUnsafe(uint8string.length);
     for (let i = 0; i < buffer.length; i++) {
         buffer[i] = uint8string.charCodeAt(i);
@@ -244,10 +262,10 @@ function uint8String__To__buffer(uint8string: string): Buffer {
     return buffer;
 }
 
-function uint8String__To__arrayBuffer(uint8string: string): ArrayBuffer {
-    return uint8String__To__uint8Array(uint8string).buffer;
+function uint8String_To_arrayBuffer(uint8string: string): ArrayBuffer {
+    return uint8String_To_uint8Array(uint8string).buffer;
 }
 
-function arrayBuffer__To__uint8String(arrayBuffer: ArrayBuffer): string {
-    return uint8Array__To__uint8String(new Uint8Array(arrayBuffer));
+function arrayBuffer_To_uint8String(arrayBuffer: ArrayBuffer): string {
+    return uint8Array_To_uint8String(new Uint8Array(arrayBuffer));
 }

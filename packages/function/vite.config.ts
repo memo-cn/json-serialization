@@ -8,13 +8,14 @@ export default defineConfig({
             name: 'inject-title',
             apply: 'serve',
             transformIndexHtml(html, ctx) {
+                const ind = name.indexOf('/');
                 return {
                     html,
                     tags: [
                         {
                             tag: 'title',
                             injectTo: 'head-prepend',
-                            children: name,
+                            children: ind === -1 ? name : name.slice(ind + 1),
                         },
                     ],
                 };

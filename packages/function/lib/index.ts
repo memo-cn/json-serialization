@@ -134,11 +134,12 @@ export function createFunctionSerDes(channel: Channel): FunctionSerDes {
     /************************** ***** **************************/
 
     const originalOnMessage: any = channel.onmessage;
-    channel.onmessage = function (data: any) {
+    channel.onmessage = function (...args: any[]) {
+        const data = args[0];
         // 如果原来存在监听器, 对其进行调用。
         if (originalOnMessage) {
             setTimeout(() => {
-                Reflect.apply(originalOnMessage, channel, arguments);
+                Reflect.apply(originalOnMessage, channel, args);
             });
         }
 

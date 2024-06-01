@@ -1,5 +1,6 @@
 {
     "name": "workspace-root",
+    "private": true,
     "version": "1.0.0",
     "workspaces": [
         "apps/*",
@@ -10,6 +11,6 @@
         "build": "pnpm -r build"
     },
     "devDependencies": {
-        "prettier": "^3.2.5"
+        "prettier": "^3.3.0"
     }
 }

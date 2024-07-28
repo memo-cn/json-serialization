@@ -1,4 +1,5 @@
 import type { Deserializer, Serializer } from 'json-serialization';
+import { createPrefixEncoder } from './prefix-encoder';
 
 /**
  * 二进制序列化算法:
@@ -38,6 +39,13 @@ let supportBlob = typeof Blob === 'function';
 // 当前环境支持 File
 let supportFile = typeof File === 'function';
 
+const binaryEncoder = createPrefixEncoder<BinaryJson>({
+    prefix: '$binary:',
+    stringify: JSON.stringify,
+    parse: JSON.parse,
+    escapeCharacter: '_',
+});
+
 // 二进制反序列化器
 export const binaryDeserializer: Deserializer = (key, value) => deserialize(value);
 
@@ -63,9 +71,9 @@ export const binarySerializer: Serializer = async function (key, value) {
 
 /** ---------------------------------------------------------------------------------- */
 
-async function serialize(value: string | File | Blob | Buffer | ArrayBuffer | Uint8Array | any): Promise<string> {
+async function serialize(value: string | BinaryJson | any): Promise<string> {
     if (typeof value === 'string') {
-        return 's' + value;
+        return binaryEncoder.encode(value);
     }
     let binaryJson: BinaryJson;
     if (supportFile && value instanceof File) {
@@ -101,14 +109,13 @@ async function serialize(value: string | File | Blob | Buffer | ArrayBuffer | Ui
     } else {
         return value as any;
     }
-    return 'b' + JSON.stringify(binaryJson);
+    return binaryEncoder.encode(binaryJson);
 }
 
 function deserialize(arg: string): any {
     if (typeof (arg as any) !== 'string') return arg;
-    if (arg[0] === 's') return arg.slice(1);
-    if (arg[0] !== 'b') return arg;
-    let obj: BinaryJson = JSON.parse(arg.slice(1));
+    let obj = binaryEncoder.decode(arg);
+    if (typeof obj === 'string') return obj;
 
     let bufferJson = obj.__type === 'Buffer' ? obj : null;
     let blobJson = obj.__type === 'Blob' ? obj : null;

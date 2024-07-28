@@ -1,7 +1,7 @@
 {
     "name": "@json-serialization/binary",
     "private": false,
-    "version": "0.0.3",
+    "version": "1.0.0",
     "description": "@json-serialization/binary provides a binary serialization and deserialization mechanism, supporting ArrayBuffer, Buffer, Blob, File, Uint8Array these data types. @json-serialization/binary 提供了一种二进制序列化和反序列化的机制，支持 ArrayBuffer、Buffer、Blob、File、Uint8Array 这些数据类型。",
     "keywords": [
         "binary",
@@ -33,7 +33,7 @@
         "@rollup/plugin-replace": "^5.0.5",
         "@rollup/plugin-terser": "^0.4.4",
         "@types/node": "^20.14.1",
-        "json-serialization": "^0.0.4",
+        "json-serialization": "^0.0.6",
         "rimraf": "^5.0.7",
         "rollup": "^4.18.0",
         "rollup-plugin-dts": "^6.1.1",

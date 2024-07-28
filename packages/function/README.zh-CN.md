@@ -28,7 +28,7 @@ var animal = {
 };
 ```
 
-> 提示: `@json-serialization/function` 需要配合 `json-serialization` 使用。这是一个可扩展的异步 JSON 序列化库，你可以通过阅读[这篇文档](https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.zh-CN.md)对其有所了解。
+> 提示: `@json-serialization/function` 可以配合 `json-serialization` 使用。这是一个可扩展的异步 JSON 序列化库，你可以通过阅读[这篇文档](https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.zh-CN.md)对其有所了解。
 
 假设你现在的场景是需要将定义在客户端的函数序列化，然后通过 WebSocket 传输到服务端。
 
@@ -50,16 +50,16 @@ var jsonText = await stringify([animal, animal.eat, animal.sleep], [clientSerDes
 ```json
 [
     {
-        "name": "scat",
-        "eat": "fd6c95def-79d3-41c7-bfb2-afc797c300a0",
-        "sleep": "fd5cff004-bb7d-43f3-bae7-ad64aac8be71"
+        "name": "cat",
+        "eat": "$fun:d6c95def-79d3-41c7-bfb2-afc797c300a0",
+        "sleep": "$fun:fd5cff004-bb7d-43f3-bae7-ad64aac8be71"
     },
-    "fd6c95def-79d3-41c7-bfb2-afc797c300a0",
-    "fd5cff004-bb7d-43f3-bae7-ad64aac8be71"
+    "$fun:d6c95def-79d3-41c7-bfb2-afc797c300a0",
+    "$fun:d5cff004-bb7d-43f3-bae7-ad64aac8be71"
 ]
 ```
 
-每一个函数都被分配了唯一的 UUID 标识，并被序列化为字符串。为了和普通的字符串区分，前面加了 `f` 或 `s` 的字符前缀，以便在解析时判断出原来的类型是函数还是本来就是字符串。
+每个函数都被分配了一个唯一的 UUID 标识符，并被序列化为带有 `$fun:` 前缀的字符串。
 
 服务端反序列化的代码可能为:
 

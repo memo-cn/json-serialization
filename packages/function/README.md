@@ -28,7 +28,7 @@ var animal = {
 };
 ```
 
-> Note: `@json-serialization/function` needs to be used in conjunction with `json-serialization`. This is an extensible asynchronous JSON serialization library. You can get to know it by reading [this document](https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.zh-CN.md).
+> Note: `@json-serialization/function` can be used with `json-serialization`. This is an extensible asynchronous JSON serialization library. You can get to know it by reading [this document](https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.zh-CN.md).
 
 Suppose your current scenario is to serialize functions defined on the client side and then transmit them to the server side via WebSocket.
 
@@ -50,16 +50,16 @@ The serialized jsonText might be:
 ```json
 [
     {
-        "name": "scat",
-        "eat": "fd6c95def-79d3-41c7-bfb2-afc797c300a0",
-        "sleep": "fd5cff004-bb7d-43f3-bae7-ad64aac8be71"
+        "name": "cat",
+        "eat": "$fun:d6c95def-79d3-41c7-bfb2-afc797c300a0",
+        "sleep": "$fun:fd5cff004-bb7d-43f3-bae7-ad64aac8be71"
     },
-    "fd6c95def-79d3-41c7-bfb2-afc797c300a0",
-    "fd5cff004-bb7d-43f3-bae7-ad64aac8be71"
+    "$fun:d6c95def-79d3-41c7-bfb2-afc797c300a0",
+    "$fun:d5cff004-bb7d-43f3-bae7-ad64aac8be71"
 ]
 ```
 
-Each function is assigned a unique UUID identifier and serialized into a string. To distinguish it from ordinary strings, a `f` or `s` character prefix is added in front, so that the original type can be determined as a `function` or a `string` during parsing.
+Each function is assigned a unique UUID identifier and serialized as a string prefixed with `$fun:`.
 
 The server-side deserialization code might be:
 

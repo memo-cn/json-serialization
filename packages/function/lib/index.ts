@@ -1,6 +1,7 @@
 import type { Deserializer, Serializer } from 'json-serialization';
 import { CallData, Channel, data2Message, message2Data, UnrefAllData, UnrefData } from './message';
 import { uuid } from './uuid';
+import { createPrefixEncoder } from './prefix-encoder';
 
 export { type Channel };
 
@@ -41,12 +42,20 @@ export type FunctionSerDes = {
  *   内部用于传输调用消息的信道。
  */
 export function createFunctionSerDes(channel: Channel): FunctionSerDes {
+    const functionEncoder = createPrefixEncoder<(...args: any[]) => any>({
+        prefix: '$fun:',
+        stringify(fun) {
+            return originalFunction2Id(fun);
+        },
+        parse(funId) {
+            return id2ProxyFunction(funId);
+        },
+        escapeCharacter: '_',
+    });
+
     const serializer: Serializer = function (key, fun: string | ((...args: any[]) => any)) {
-        if (typeof fun === 'string') {
-            return 's' + fun;
-        }
-        if (typeof fun === 'function') {
-            return `f${originalFunction2Id(fun)}`;
+        if (typeof fun === 'string' || typeof fun === 'function') {
+            return functionEncoder.encode(fun);
         }
         return fun;
     };
@@ -55,14 +64,7 @@ export function createFunctionSerDes(channel: Channel): FunctionSerDes {
         if (typeof (str as any) !== 'string') {
             return str;
         }
-        if (str[0] === 's') {
-            return str.slice(1);
-        }
-        if (str[0] !== 'f') {
-            return str;
-        }
-        const funId = str.slice(1);
-        return id2ProxyFunction(funId);
+        return functionEncoder.decode(str);
     };
 
     /************************** ***** **************************/

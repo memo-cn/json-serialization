@@ -1,7 +1,7 @@
 {
     "name": "@json-serialization/function",
     "private": false,
-    "version": "0.0.4",
+    "version": "1.0.0",
     "description": "@json-serialization/function provides a mechanism for function serialization and deserialization, which can implement cross-context function calls without using eval. @json-serialization/function 提供了一种函数序列化和反序列化的机制，能够在不使用 eval 的情况下实现函数的跨上下文调用。",
     "keywords": [
         "function",
@@ -33,7 +33,7 @@
         "@rollup/plugin-replace": "^5.0.5",
         "@rollup/plugin-terser": "^0.4.4",
         "@types/node": "^20.14.1",
-        "json-serialization": "^0.0.4",
+        "json-serialization": "^0.0.6",
         "rimraf": "^5.0.7",
         "rollup": "^4.18.0",
         "rollup-plugin-dts": "^6.1.1",

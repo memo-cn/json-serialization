@@ -27,6 +27,64 @@ var json = await stringify({ name: 'memo', age: 18 });
 var object = await parse(json);
 ```
 
+### 循环引用
+
+`json-serialization` 内置支持序列化和反序列化包含循环引用的数据结构。
+
+在序列化过程中，循环引用会被转换为引用路径字符串。
+
+以下是包含循环引用的数据结构示例:
+
+```ts
+var html = { name: 'html' };
+var head = { name: 'head' };
+var body = { name: 'body' };
+
+head.parent = html;
+body.parent = html;
+
+head.next = body;
+body.prev = head;
+
+html.children = [head, body];
+
+var json = await stringify(html, null, 4);
+```
+
+序列化后的 JSON 字符串为:
+
+```json
+{
+    "name": "html",
+    "children": [
+        {
+            "name": "head",
+            "parent": "$ref:[]",
+            "next": {
+                "name": "body",
+                "parent": "$ref:[]",
+                "prev": "$ref:[\"children\",\"0\"]"
+            }
+        },
+        "$ref:[\"children\",\"0\",\"next\"]"
+    ]
+}
+```
+
+你也可以单独使用 `json-serialization` 提供的 `replaceCircularReference` 方法，得到一个以引用路径表示循环引用的新对象。
+
+然后，通过 `restoreCircularReference` 方法恢复引用关系。
+
+```ts
+import { replaceCircularReference, restoreCircularReference } from 'json-serialization';
+
+var replacedObject = replaceCircularReference(html);
+
+var json = JSON.stringify(replacedObject);
+
+var circularObject = restoreCircularReference(JSON.parse(json));
+```
+
 ### 扩展序列化规则
 
 `json-serialization` 支持通过提供 `Deserializer` 和 `Serializer` 来自定义来扩展序列化和反序列化规则。
@@ -49,7 +107,7 @@ function parse(
 
 `Serializer` 类似于 `JSON.stringify` 的 `replacer` 参数，`Deserialize` 类似于 `JSON.parse` 的 `reviver` 参数。
 
-下面的示例展示如何将 `bigint` 序列化为字符串，以及如何进行反序列化。
+以下示例展示如何将 `bigint` 序列化为字符串，以及如何进行反序列化。
 
 ```ts
 import type { Serializer, Deserializer } from 'json-serialization';

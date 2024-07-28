@@ -27,6 +27,64 @@ var json = await stringify({ name: 'memo', age: 18 });
 var object = await parse(json);
 ```
 
+### Circular References
+
+`json-serialization` has built-in support for serializing and deserializing data structures that contain circular references.
+
+During serialization, circular references are converted to reference path strings.
+
+Here is an example of a data structure with circular references:
+
+```ts
+var html = { name: 'html' };
+var head = { name: 'head' };
+var body = { name: 'body' };
+
+head.parent = html;
+body.parent = html;
+
+head.next = body;
+body.prev = head;
+
+html.children = [head, body];
+
+var json = await stringify(html, null, 4);
+```
+
+The serialized JSON string is:
+
+```json
+{
+    "name": "html",
+    "children": [
+        {
+            "name": "head",
+            "parent": "$ref:[]",
+            "next": {
+                "name": "body",
+                "parent": "$ref:[]",
+                "prev": "$ref:[\"children\",\"0\"]"
+            }
+        },
+        "$ref:[\"children\",\"0\",\"next\"]"
+    ]
+}
+```
+
+You can also use the `replaceCircularReference` method provided by `json-serialization` to obtain a new object where circular references are represented by reference paths.
+
+Then, restore the reference relationships using the `restoreCircularReference` method.
+
+```ts
+import { replaceCircularReference, restoreCircularReference } from 'json-serialization';
+
+var replacedObject = replaceCircularReference(html);
+
+var json = JSON.stringify(replacedObject);
+
+var circularObject = restoreCircularReference(JSON.parse(json));
+```
+
 ### Extending Serialization Rules
 
 `json-serialization` supports extending serialization and deserialization rules by providing `Deserializer` and `Serializer` for customization.

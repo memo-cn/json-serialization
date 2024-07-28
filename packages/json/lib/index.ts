@@ -1,3 +1,6 @@
+import { replaceCircularReference, restoreCircularReference } from './circular-reference';
+export { replaceCircularReference, restoreCircularReference };
+
 /**
  * Serializer 序列化器
  * @description Similar to the replacer parameter of JSON.stringify. 类似于 JSON.stringify 的 replacer 参数。
@@ -22,7 +25,7 @@ export type Deserializer = (this: any, key: string, value: any) => any | Promise
  * @param {null | undefined | Deserializer | (null | undefined | Deserializer)[]} [deserializer] - Optional deserializer(s) to customize the parsing behavior. 可选的反序列化器以自定义序列化行为。
  * @returns {Promise<any>} The parsed object. 解析后的对象。
  */
-export function parse(
+export async function parse(
     text: string,
     deserializer?: null | undefined | Deserializer | (null | undefined | Deserializer)[],
 ): Promise<any> {
@@ -33,55 +36,57 @@ export function parse(
     const deserializerList: Deserializer[] = deserializer?.filter((f) => typeof f === 'function') as Deserializer[];
 
     if (!deserializerList || deserializerList.length === 0) {
-        return JSON.parse(text);
+        return restoreCircularReference(JSON.parse(text));
     }
 
     const value2deserialized = new Map<any, any>();
 
     deserializerList.reverse();
 
-    return JSON.parse(text, function (key, value) {
-        if (value2deserialized.has(value)) {
-            return value2deserialized.get(value);
-        }
+    return restoreCircularReference(
+        await JSON.parse(text, function (key, value) {
+            if (value2deserialized.has(value)) {
+                return value2deserialized.get(value);
+            }
 
-        const promise = new Promise<any>(async (resolve, reject) => {
-            try {
-                let deserializedValue = await value;
+            const promise = new Promise<any>(async (resolve, reject) => {
+                try {
+                    let deserializedValue = await value;
 
-                {
-                    let error: any;
-                    let hasError = false;
-                    if (Object(deserializedValue) === deserializedValue) {
-                        for (let [k, v] of Object.entries(deserializedValue)) {
-                            try {
-                                deserializedValue[k] = await v;
-                            } catch (e) {
-                                // 遇到被拒绝的 v 时, 仍然需要继续处理其他 v, 而不是立即抛出第一个错误。否则, 控制台会提示 Uncaught (in promise)
-                                if (!hasError) {
-                                    hasError = true;
-                                    error = e;
+                    {
+                        let error: any;
+                        let hasError = false;
+                        if (Object(deserializedValue) === deserializedValue) {
+                            for (let [k, v] of Object.entries(deserializedValue)) {
+                                try {
+                                    deserializedValue[k] = await v;
+                                } catch (e) {
+                                    // 遇到被拒绝的 v 时, 仍然需要继续处理其他 v, 而不是立即抛出第一个错误。否则, 控制台会提示 Uncaught (in promise)
+                                    if (!hasError) {
+                                        hasError = true;
+                                        error = e;
+                                    }
                                 }
                             }
                         }
+                        if (hasError) throw error;
                     }
-                    if (hasError) throw error;
+
+                    for (let i = 0; i < deserializerList.length; i++) {
+                        const deserializer = deserializerList[i];
+                        deserializedValue = await deserializer.bind(this)(key, deserializedValue);
+                    }
+
+                    resolve(deserializedValue);
+                } catch (e) {
+                    reject(e);
                 }
+            });
 
-                for (let i = 0; i < deserializerList.length; i++) {
-                    const deserializer = deserializerList[i];
-                    deserializedValue = await deserializer.bind(this)(key, deserializedValue);
-                }
-
-                resolve(deserializedValue);
-            } catch (e) {
-                reject(e);
-            }
-        });
-
-        value2deserialized.set(value, promise);
-        return promise;
-    });
+            value2deserialized.set(value, promise);
+            return promise;
+        }),
+    );
 }
 
 /**
@@ -98,6 +103,8 @@ export async function stringify(
     serializer?: null | undefined | Serializer | (null | undefined | Serializer)[],
     space?: number,
 ): Promise<string> {
+    value = replaceCircularReference(value);
+
     if (!Array.isArray(serializer)) {
         serializer = [serializer];
     }

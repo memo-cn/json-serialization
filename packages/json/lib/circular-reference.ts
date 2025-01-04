@@ -72,21 +72,29 @@ export function replaceCircularReference<T = any>(data: T): T {
             valueToPathMap.set(value, path);
         }
 
-        // 复制对象或数组
-        let clone: typeof value = Array.isArray(value) ? [] : {};
+        // 新的对象或数组
+        let clone: any;
         // 是否包含循环引用
         let containsCircularReference = false;
-        // 遍历键值对
-        for (let [key, originalValue] of Object.entries(value)) {
-            // 递归处理子值
-            const newValue = replace(originalValue, path.concat(key));
-            // 如果 clone 的当前属性与新值不同，则更新 clone 的该属性为新值
-            if (clone[key] !== newValue) {
+        if (Array.isArray(value)) {
+            clone = [];
+        } else if (Reflect.getPrototypeOf(value) === Object.prototype) {
+            clone = {};
+        } else {
+            // 既非普通对象，也非数组的对象将被原样保留。
+            clone = value;
+        }
+
+        if (clone !== value) {
+            // 遍历键值对
+            for (let [key, originalValue] of Object.entries(value)) {
+                // 递归处理子值
+                const newValue = replace(originalValue, path.concat(key));
                 clone[key] = newValue;
-            }
-            // 如果原始值与新值不同，表明存在循环引用
-            if (originalValue !== newValue) {
-                containsCircularReference = true;
+                // 如果原始值与新值不同，表明存在循环引用
+                if (originalValue !== newValue) {
+                    containsCircularReference = true;
+                }
             }
         }
 
@@ -108,7 +116,6 @@ export function replaceCircularReference<T = any>(data: T): T {
  *   该函数会直接修改输入的数据结构。
  */
 export function restoreCircularReference<T = any>(data: T): T {
-
     // 用于存储值到引用值或缓存值的映射，用于恢复引用关系
     const valueToNewValue = new Map<any, any>();
 
@@ -117,7 +124,6 @@ export function restoreCircularReference<T = any>(data: T): T {
 
     // 递归恢复函数
     function restore(value: any) {
-
         // 恢复引用关系
         if (valueToNewValue.has(value)) {
             return valueToNewValue.get(value);
@@ -149,7 +155,7 @@ export function restoreCircularReference<T = any>(data: T): T {
         for (let [key, originalValue] of Object.entries(value)) {
             // 递归处理子值
             const newValue = restore(originalValue);
-            if (newValue !== value[key]) {
+            if (!Object.is(newValue, originalValue)) {
                 value[key] = newValue;
             }
         }

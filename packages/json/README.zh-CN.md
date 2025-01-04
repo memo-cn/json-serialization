@@ -146,7 +146,7 @@ var json = await stringify({ name: 'memo', age: 18n }, [BigIntSerializer]);
 var object = await parse(json, [BigIntDeserializer]);
 ```
 
-当指定多个序列化器或反序列化器件时，它们会被串行调用（前一个序列化器的返回值作为下一个序列化器的入参）。
+当指定多个序列化器或反序列化器时，它们会被串行调用（前一个序列化器的返回值作为下一个序列化器的入参）。
 请确保同一组序列化器和反序列化器在两个列表中的书写顺序一致。
 
 ## 许可

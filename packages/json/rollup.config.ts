@@ -7,7 +7,9 @@ import replace from '@rollup/plugin-replace';
 import terser from '@rollup/plugin-terser';
 import ts from 'rollup-plugin-typescript2';
 import { defineConfig, RollupOptions } from 'rollup';
-import pkg from './package.json' assert { type: 'json' };
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const pkg: typeof import('./package.json') = require('./package.json');
 
 export default defineConfig(function (commandLineArguments) {
     if (commandLineArguments.watch) {

@@ -33,7 +33,7 @@
         "@rollup/plugin-replace": "^5.0.5",
         "@rollup/plugin-terser": "^0.4.4",
         "@types/node": "^20.14.1",
-        "json-serialization": "^0.0.6",
+        "json-serialization": "0.0.7",
         "rimraf": "^5.0.7",
         "rollup": "^4.18.0",
         "rollup-plugin-dts": "^6.1.1",

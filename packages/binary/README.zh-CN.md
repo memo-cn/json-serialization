@@ -10,9 +10,9 @@
 
 ## 注意事项
 
--   考虑到在 Web 环境中，`Buffer` 不受支持，在低版本 Node.js 环境中可能也不支持 `Blob` 和 `File`。在反序列化时，`@json-serialization/binary` 可能会对这 3 种数据类型进行相互转换，以确保适应运行环境。
+- 考虑到在 Web 环境中，`Buffer` 不受支持，在低版本 Node.js 环境中可能也不支持 `Blob` 和 `File`。在反序列化时，`@json-serialization/binary` 可能会对这 3 种数据类型进行相互转换，以确保适应运行环境。
 
--   为了防止 `Buffer` 被 `JSON.stringify` 预处理，`@json-serialization/binary` 内部会在 `Buffer` 对象实例上设置 `toJSON` 属性，值设为 `null`，请注意并处理可能的影响。
+- 为了防止 `Buffer` 被 `JSON.stringify` 预处理，`@json-serialization/binary` 内部会在 `Buffer` 对象实例上设置 `toJSON` 属性，值设为 `null`，请注意并处理可能的影响。
 
 ## 许可
 

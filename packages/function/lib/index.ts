@@ -1,7 +1,7 @@
 import type { Deserializer, Serializer } from 'json-serialization';
 import { CallData, Channel, data2Message, message2Data, UnrefAllData, UnrefData } from './message';
 import { uuid } from './uuid';
-import { createPrefixEncoder } from './prefix-encoder';
+import { createPrefixEncoder } from 'prefix-encoder';
 
 export { type Channel };
 
@@ -44,13 +44,13 @@ export type FunctionSerDes = {
 export function createFunctionSerDes(channel: Channel): FunctionSerDes {
     const functionEncoder = createPrefixEncoder<(...args: any[]) => any>({
         prefix: '$fun:',
+        escapeCharacter: '_',
         stringify(fun) {
             return originalFunction2Id(fun);
         },
         parse(funId) {
             return id2ProxyFunction(funId);
         },
-        escapeCharacter: '_',
     });
 
     const serializer: Serializer = function (key, fun: string | ((...args: any[]) => any)) {

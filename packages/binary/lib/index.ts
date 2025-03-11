@@ -1,11 +1,7 @@
 import type { Deserializer, Serializer } from 'json-serialization';
-import { createPrefixEncoder } from './prefix-encoder';
+import { createPrefixEncoder } from 'prefix-encoder';
 
 /**
- * 二进制序列化算法:
- * - 字符串序列化为: s${字符串}
- * - 其它序列化为:   b${包含字节序信息的 JSON 字符串}
- * ----------------------------------------------------------------------------------
  *
  * 字节序列化算法:（uint8 字节序 → uint8 字符串）
  *   将每一个 uint8 字节的数值作为 Unicode 的编码, 得到的字符顺次拼接起来, 称为 uint8 字符串
@@ -40,7 +36,7 @@ let supportBlob = typeof Blob === 'function';
 let supportFile = typeof File === 'function';
 
 const binaryEncoder = createPrefixEncoder<BinaryJson>({
-    prefix: '$binary:',
+    prefix: '$bin:',
     stringify: JSON.stringify,
     parse: JSON.parse,
     escapeCharacter: '_',
@@ -233,7 +229,7 @@ async function blob_To_uint8String(blob: Blob): Promise<string> {
 }
 
 function uint8String_To_blob(uint8string: string, options?: BlobPropertyBag): Blob {
-    return new Blob([uint8String_To_uint8Array(uint8string).buffer], options);
+    return new Blob([uint8String_To_uint8Array(uint8string).buffer as ArrayBuffer], options);
 }
 
 function buffer_To_unit8String(buffer: Buffer) {
@@ -249,7 +245,7 @@ function uint8String_To_buffer(uint8string: string): Buffer {
 }
 
 function uint8String_To_arrayBuffer(uint8string: string): ArrayBuffer {
-    return uint8String_To_uint8Array(uint8string).buffer;
+    return uint8String_To_uint8Array(uint8string).buffer as ArrayBuffer;
 }
 
 function arrayBuffer_To_uint8String(arrayBuffer: ArrayBuffer): string {

@@ -1,13 +1,19 @@
 import babel from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
 import dts from 'rollup-plugin-dts';
-import json from '@rollup/plugin-json';
+// import json from '@rollup/plugin-json';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
-import terser from '@rollup/plugin-terser';
+// import terser from '@rollup/plugin-terser';
 import ts from 'rollup-plugin-typescript2';
-import { defineConfig, RollupOptions } from 'rollup';
-import pkg from './package.json' assert { type: 'json' };
+import { defineConfig, OutputOptions, RollupOptions, Plugin } from 'rollup';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const pkg: typeof import('./package.json') = require('./package.json');
+
+const sourcemap = true;
+const input = './lib/index.ts';
+const external = Object.keys(pkg.dependencies);
 
 export default defineConfig(function (commandLineArguments) {
     if (commandLineArguments.watch) {
@@ -15,10 +21,9 @@ export default defineConfig(function (commandLineArguments) {
     return rollupOptions;
 });
 
-const sourcemap = true;
-
 const plugins = {
     babel: babel({
+        babelHelpers: 'bundled',
         minified: true,
         comments: false,
         sourceMaps: sourcemap,
@@ -35,7 +40,18 @@ const plugins = {
         sourceMap: sourcemap,
     }),
     dts: dts(),
-    json: json(),
+    // json: json(),
+    json: {
+        name: 'json',
+        transform(code, id) {
+            if (id.endsWith('package.json')) {
+                return {
+                    map: { mappings: '' },
+                    code: `export const name = ${JSON.stringify(pkg.name)};`,
+                };
+            }
+        },
+    } satisfies Plugin,
     nodeResolve: nodeResolve(),
     replace: replace({
         preventAssignment: true,
@@ -46,10 +62,24 @@ const plugins = {
     // terser: terser({
     //     sourceMap: sourcemap,
     // }),
-    ts: ts(),
+    ts: (() => {
+        const targets = ['es5', 'esnext'] as const;
+        return Object.fromEntries(
+            targets.map((target) => [
+                target,
+                ts({
+                    tsconfigOverride: {
+                        compilerOptions: {
+                            target,
+                        },
+                    },
+                }),
+            ]),
+        ) as {
+            [K in (typeof targets)[number]]: ReturnType<typeof ts>;
+        };
+    })(),
 };
-
-const input = './lib/index.ts';
 
 const rollupOptions: RollupOptions[] = [
     /** 声明文件 */
@@ -61,23 +91,40 @@ const rollupOptions: RollupOptions[] = [
             },
         ],
         plugins: [plugins.dts, plugins.nodeResolve, plugins.json, plugins.commonjs],
-    } as RollupOptions,
-    {
-        plugins: [ts(), plugins.replace, plugins.nodeResolve, plugins.json, plugins.commonjs],
-        input,
-        output: [
+        external,
+    } satisfies RollupOptions,
+    ...(
+        [
             {
                 format: 'es',
                 file: pkg.module,
-                sourcemap,
-                plugins: [plugins.terser, plugins.babel],
             },
             {
                 format: 'commonjs',
                 file: pkg.main,
-                sourcemap,
-                plugins: [plugins.terser, plugins.babel],
             },
-        ],
-    } as RollupOptions,
+        ] satisfies Pick<OutputOptions, 'format' | 'file'>[]
+    ).map(({ format, file }) => {
+        return {
+            plugins: [
+                plugins.replace,
+                plugins.nodeResolve,
+                plugins.json,
+                plugins.commonjs,
+                plugins.terser,
+                // format === 'es' ? plugins.ts.esnext : plugins.ts.es5,
+                plugins.ts.esnext,
+                format === 'es' ? null : plugins.babel,
+            ],
+            input,
+            external,
+            output: [
+                {
+                    format,
+                    file,
+                    sourcemap,
+                },
+            ],
+        } satisfies RollupOptions;
+    }),
 ].filter((e) => e);

@@ -1,5 +1,4 @@
-import { replaceCircularReference, restoreCircularReference } from './circular-reference';
-export { replaceCircularReference, restoreCircularReference };
+import { replaceReference, restoreReference } from 'reference-path';
 
 /**
  * Serializer 序列化器
@@ -19,6 +18,9 @@ export type Serializer = (this: any, key: string, value: any) => any | Promise<a
  */
 export type Deserializer = (this: any, key: string, value: any) => any | Promise<any>;
 
+// 当前环境支持 AggregateError
+const supportAggregateError = typeof AggregateError === 'function';
+
 /**
  * @description Converts a string into an object using a list of deserializers, enhancing the native JSON.parse function. 使用一组反序列化器将字符串解析为对象，增强了原生的 JSON.parse 函数。
  * @param {string} text - A valid JSON string. 一个有效的 JSON 字符串。
@@ -36,14 +38,14 @@ export async function parse(
     const deserializerList: Deserializer[] = deserializer?.filter((f) => typeof f === 'function') as Deserializer[];
 
     if (!deserializerList || deserializerList.length === 0) {
-        return restoreCircularReference(JSON.parse(text));
+        return restoreReference(JSON.parse(text));
     }
 
     const value2deserialized = new Map<any, any>();
 
     deserializerList.reverse();
 
-    return restoreCircularReference(
+    return restoreReference(
         await JSON.parse(text, function (key, value) {
             if (value2deserialized.has(value)) {
                 return value2deserialized.get(value);
@@ -54,22 +56,28 @@ export async function parse(
                     let deserializedValue = await value;
 
                     {
-                        let error: any;
-                        let hasError = false;
+                        // 遇到被拒绝的 v 时, 仍然需要继续处理其他 v, 而不是立即抛出第一个错误。否则, 控制台会提示 Uncaught (in promise)
+                        const errors: any[] = [];
                         if (Object(deserializedValue) === deserializedValue) {
-                            for (let [k, v] of Object.entries(deserializedValue)) {
+                            for (const [k, v] of Object.entries(deserializedValue)) {
                                 try {
                                     deserializedValue[k] = await v;
                                 } catch (e) {
-                                    // 遇到被拒绝的 v 时, 仍然需要继续处理其他 v, 而不是立即抛出第一个错误。否则, 控制台会提示 Uncaught (in promise)
-                                    if (!hasError) {
-                                        hasError = true;
-                                        error = e;
+                                    if (supportAggregateError && e instanceof AggregateError) {
+                                        errors.push(...e.errors);
+                                    } else {
+                                        errors.push(e);
                                     }
                                 }
                             }
                         }
-                        if (hasError) throw error;
+                        if (errors.length > 0) {
+                            if (supportAggregateError && errors.length > 1) {
+                                throw new AggregateError(errors, 'multiple errors occurred during parsing');
+                            } else {
+                                throw errors[0];
+                            }
+                        }
                     }
 
                     for (let i = 0; i < deserializerList.length; i++) {
@@ -103,7 +111,7 @@ export async function stringify(
     serializer?: null | undefined | Serializer | (null | undefined | Serializer)[],
     space?: number,
 ): Promise<string> {
-    value = replaceCircularReference(value);
+    value = replaceReference(value);
 
     if (!Array.isArray(serializer)) {
         serializer = [serializer];
@@ -135,7 +143,7 @@ export async function stringify(
         value2serialized.set(rawValue, serializedValue);
 
         if (typeof serializedValue !== 'function' && Object(serializedValue) === serializedValue) {
-            for (let [key, val] of Object.entries(serializedValue)) {
+            for (const [key, val] of Object.entries(serializedValue)) {
                 valueQueue.push([key, val, serializedValue]);
             }
         }

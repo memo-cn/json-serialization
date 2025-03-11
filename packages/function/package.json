@@ -1,7 +1,7 @@
 {
     "name": "@json-serialization/function",
     "private": false,
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "@json-serialization/function provides a mechanism for function serialization and deserialization, which can implement cross-context function calls without using eval. @json-serialization/function 提供了一种函数序列化和反序列化的机制，能够在不使用 eval 的情况下实现函数的跨上下文调用。",
     "keywords": [
         "function",
@@ -14,33 +14,36 @@
     "types": "./dist/index.d.ts",
     "exports": {
         ".": {
+            "types": "./dist/index.d.ts",
             "require": "./dist/index.cjs",
-            "import": "./dist/index.mjs",
-            "types": "./dist/index.d.ts"
+            "import": "./dist/index.mjs"
         }
     },
     "scripts": {
         "dev": "vite",
         "build": "rimraf ./dist/* && rollup -c --configPlugin rollup-plugin-typescript2"
     },
+    "dependencies": {
+        "prefix-encoder": "^1.0.1"
+    },
     "devDependencies": {
-        "@babel/core": "^7.24.6",
-        "@babel/preset-env": "^7.24.6",
+        "@babel/core": "^7.26.10",
+        "@babel/preset-env": "^7.26.9",
         "@rollup/plugin-babel": "^6.0.4",
-        "@rollup/plugin-commonjs": "^25.0.8",
+        "@rollup/plugin-commonjs": "^28.0.3",
         "@rollup/plugin-json": "^6.1.0",
-        "@rollup/plugin-node-resolve": "^15.2.3",
-        "@rollup/plugin-replace": "^5.0.5",
+        "@rollup/plugin-node-resolve": "^16.0.1",
+        "@rollup/plugin-replace": "^6.0.2",
         "@rollup/plugin-terser": "^0.4.4",
-        "@types/node": "^20.14.1",
-        "json-serialization": "0.0.7",
-        "rimraf": "^5.0.7",
-        "rollup": "^4.18.0",
-        "rollup-plugin-dts": "^6.1.1",
+        "@types/node": "^22.13.11",
+        "json-serialization": "workspace:*",
+        "rimraf": "^6.0.1",
+        "rollup": "^4.36.0",
+        "rollup-plugin-dts": "^6.2.1",
         "rollup-plugin-typescript2": "^0.36.0",
-        "tslib": "^2.6.2",
-        "typescript": "^5.4.5",
-        "vite": "^5.2.12"
+        "tslib": "^2.8.1",
+        "typescript": "^5.8.2",
+        "vite": "^6.2.2"
     },
     "files": [
         "dist",

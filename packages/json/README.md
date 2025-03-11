@@ -1,4 +1,4 @@
-# json-serialization<a href="https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.md"><img src="https://img.shields.io/npm/v/json-serialization.svg" /></a> <a href="https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.md"><img src="https://packagephobia.now.sh/badge?p=json-serialization" /></a>
+# json-serialization <a href="https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.md"><img src="https://img.shields.io/npm/v/json-serialization.svg" /></a> <a href="https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.md"><img src="https://packagephobia.now.sh/badge?p=json-serialization" /></a>
 
 [English](https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.md) | [简体中文](https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.zh-CN.md)
 
@@ -29,11 +29,11 @@ var object = await parse(json);
 
 ### Circular References
 
-`json-serialization` has built-in support for serializing and deserializing data structures that contain circular references.
+`json-serialization` integrates with [`reference-path`](https://github.com/memo-cn/reference-path/blob/main/README.md). During serialization, it converts repeated references (including circular references) within JavaScript object structures into string-formatted reference paths.
 
-During serialization, circular references are converted to reference path strings.
+During deserialization, these reference paths are restored to their original reference relationships.
 
-Here is an example of a data structure with circular references:
+Below is an example of an object structure containing circular references:
 
 ```ts
 var html = { name: 'html' };
@@ -59,31 +59,19 @@ The serialized JSON string is:
     "children": [
         {
             "name": "head",
-            "parent": "$ref:[]",
+            "parent": "$ref:",
             "next": {
                 "name": "body",
-                "parent": "$ref:[]",
-                "prev": "$ref:[\"children\",\"0\"]"
+                "parent": "$ref:",
+                "prev": "$ref:children.0"
             }
         },
-        "$ref:[\"children\",\"0\",\"next\"]"
+        "$ref:children.0.next"
     ]
 }
 ```
 
-You can also use the `replaceCircularReference` method provided by `json-serialization` to obtain a new object where circular references are represented by reference paths.
-
-Then, restore the reference relationships using the `restoreCircularReference` method.
-
-```ts
-import { replaceCircularReference, restoreCircularReference } from 'json-serialization';
-
-var replacedObject = replaceCircularReference(html);
-
-var json = JSON.stringify(replacedObject);
-
-var circularObject = restoreCircularReference(JSON.parse(json));
-```
+In the above example, `$ref:children.0.next` is a reference path, which represents the object pointed to by the `next` property of the element with an index of `0` in the array corresponding to the `children` property of the root object.
 
 ### Extending Serialization Rules
 

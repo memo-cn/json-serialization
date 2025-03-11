@@ -1,7 +1,7 @@
 {
-    "include": ["./lib"],
+    "include": ["./lib", "./rollup.config.ts", "./vite.config.ts"],
     "compilerOptions": {
-        "target": "es5",
+        "target": "esnext",
         "useDefineForClassFields": true,
         "module": "ESNext",
         "lib": ["ESNext", "DOM", "DOM.Iterable"],

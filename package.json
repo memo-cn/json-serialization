@@ -7,10 +7,10 @@
         "packages/*"
     ],
     "scripts": {
-        "prettier": "prettier --write .",
+        "format": "prettier --write .",
         "build": "pnpm -r build"
     },
     "devDependencies": {
-        "prettier": "^3.3.0"
+        "prettier": "^3.5.3"
     }
 }

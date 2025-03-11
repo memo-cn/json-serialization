@@ -1,5 +1,7 @@
 # json-serialization Change Log
 
+## v1.0.0（2025-03-23）
+
 ## v0.0.7（2025-01-04）
 
 - The `replaceCircularReference` method no longer handles objects other than basic objects and arrays. `replaceCircularReference` 方法不再处理基础对象和数组之外的对象。

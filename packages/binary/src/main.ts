@@ -12,7 +12,7 @@ async function main() {
         }),
         blob: new Blob(['hi', '测试'], { type: 'text' }),
         uint8: Uint8Array.from([96, 97, 98]),
-        arrayBuffer: new ArrayBuffer(2),
+        arrayBuffer: Uint8Array.from([30, 31]).buffer,
     };
 
     var json = await stringify(oldObject, [binarySerializer], 4);

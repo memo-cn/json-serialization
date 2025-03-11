@@ -1,4 +1,4 @@
-# json-serialization<a href="https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.zh-CN.md"><img src="https://img.shields.io/npm/v/json-serialization.svg" /></a> <a href="https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.zh-CN.md"><img src="https://packagephobia.now.sh/badge?p=json-serialization" /></a>
+# json-serialization <a href="https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.zh-CN.md"><img src="https://img.shields.io/npm/v/json-serialization.svg" /></a> <a href="https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.zh-CN.md"><img src="https://packagephobia.now.sh/badge?p=json-serialization" /></a>
 
 [English](https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.md) | [简体中文](https://github.com/memo-cn/json-serialization/blob/main/packages/json/README.zh-CN.md)
 
@@ -29,11 +29,9 @@ var object = await parse(json);
 
 ### 循环引用
 
-`json-serialization` 内置支持序列化和反序列化包含循环引用的数据结构。
+`json-serialization` 集成了 [`reference-path`](https://github.com/memo-cn/reference-path/blob/main/README.zh-CN.md)，在序列化时会将 JavaScript 对象结构中重复出现的引用（包括循环引用）转换为字符串格式的引用路径，并在反序列化时恢复原始的引用关系。
 
-在序列化过程中，循环引用会被转换为引用路径字符串。
-
-以下是包含循环引用的数据结构示例:
+以下是一个包含循环引用的数据结构示例：
 
 ```ts
 var html = { name: 'html' };
@@ -59,31 +57,19 @@ var json = await stringify(html, null, 4);
     "children": [
         {
             "name": "head",
-            "parent": "$ref:[]",
+            "parent": "$ref:",
             "next": {
                 "name": "body",
-                "parent": "$ref:[]",
-                "prev": "$ref:[\"children\",\"0\"]"
+                "parent": "$ref:",
+                "prev": "$ref:children.0"
             }
         },
-        "$ref:[\"children\",\"0\",\"next\"]"
+        "$ref:children.0.next"
     ]
 }
 ```
 
-你也可以单独使用 `json-serialization` 提供的 `replaceCircularReference` 方法，得到一个以引用路径表示循环引用的新对象。
-
-然后，通过 `restoreCircularReference` 方法恢复引用关系。
-
-```ts
-import { replaceCircularReference, restoreCircularReference } from 'json-serialization';
-
-var replacedObject = replaceCircularReference(html);
-
-var json = JSON.stringify(replacedObject);
-
-var circularObject = restoreCircularReference(JSON.parse(json));
-```
+在上面的示例中，`$ref:children.0.next` 就是一个引用路径，表示根对象的 `children` 属性对应的数组中，索引为 `0` 的元素的 `next` 属性所指向的对象。
 
 ### 扩展序列化规则
 

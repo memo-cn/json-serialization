@@ -1,0 +1,71 @@
+{
+    "name": "@json-serialization/function",
+    "private": false,
+    "version": "1.0.2",
+    "description": "@json-serialization/function provides a mechanism for function serialization and deserialization, which can implement cross-context function calls without using eval. @json-serialization/function 提供了一种函数序列化和反序列化的机制，能够在不使用 eval 的情况下实现函数的跨上下文调用。",
+    "keywords": [
+        "function",
+        "serialization"
+    ],
+    "homepage": "https://github.com/memo-cn/json-serialization/tree/main/packages/function#readme",
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "require": "./dist/index.cjs",
+            "import": "./dist/index.mjs"
+        }
+    },
+    "scripts": {
+        "dev": "vite",
+        "build": "rimraf ./dist/* && rollup -c --configPlugin rollup-plugin-typescript2"
+    },
+    "dependencies": {
+        "prefix-encoder": "^1.0.1"
+    },
+    "peerDependencies": {
+        "json-serialization": "workspace:^"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.28.4",
+        "@babel/preset-env": "^7.28.3",
+        "@rollup/plugin-babel": "^6.0.4",
+        "@rollup/plugin-commonjs": "^28.0.6",
+        "@rollup/plugin-json": "^6.1.0",
+        "@rollup/plugin-node-resolve": "^16.0.1",
+        "@rollup/plugin-replace": "^6.0.2",
+        "@rollup/plugin-terser": "^0.4.4",
+        "@types/node": "^24.6.2",
+        "rimraf": "^6.0.1",
+        "rollup": "^4.52.3",
+        "rollup-plugin-dts": "^6.2.3",
+        "rollup-plugin-typescript2": "^0.36.0",
+        "tslib": "^2.8.1",
+        "typescript": "^5.9.3",
+        "vite": "^7.1.8"
+    },
+    "files": [
+        "dist",
+        "CHANGELOG.md",
+        "LICENSE",
+        "package.json",
+        "README.md",
+        "README.zh-CN.md"
+    ],
+    "author": {
+        "name": "memo",
+        "email": "i@memo.cool"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:memo-cn/json-serialization.git"
+    },
+    "bugs": {
+        "email": "i@memo.cool",
+        "url": "https://github.com/memo-cn/json-serialization/issues"
+    },
+    "license": "MIT"
+}

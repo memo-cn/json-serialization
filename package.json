@@ -1,0 +1,16 @@
+{
+    "name": "workspace-root",
+    "private": true,
+    "version": "1.0.0",
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "scripts": {
+        "format": "prettier --write .",
+        "build": "pnpm -r build"
+    },
+    "devDependencies": {
+        "prettier": "^3.6.2"
+    }
+}

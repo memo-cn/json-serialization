@@ -1,4 +1,4 @@
-# @json-serialization/function <a href="https://github.com/memo-cn/json-serialization/blob/main/packages/function/README.zh-CN.md"><img src="https://img.shields.io/npm/v/@json-serialization/function.svg" /></a> <a href="https://github.com/memo-cn/json-serialization/blob/main/packages/function/README.zh-CN.md"><img src="https://packagephobia.now.sh/badge?p=@json-serialization/function" /></a>
+# @json-serialization/function <a href="https://www.npmjs.com/package/@json-serialization/function"><img src="https://img.shields.io/npm/v/@json-serialization/function.svg" /></a>
 
 [English](https://github.com/memo-cn/json-serialization/blob/main/packages/function/README.md) | [简体中文](https://github.com/memo-cn/json-serialization/blob/main/packages/function/README.zh-CN.md)
 

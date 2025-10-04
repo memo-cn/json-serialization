@@ -1,9 +1,7 @@
 import { stringify, parse } from '../lib';
 import type { Serializer, Deserializer } from '../lib';
 
-basicDemo();
 circularReferenceDemo();
-
 async function circularReferenceDemo() {
     var html = { name: 'html' };
     var head = { name: 'head' };
@@ -22,6 +20,7 @@ async function circularReferenceDemo() {
     console.log(json, json === (await stringify(await parse(json), null, 4)));
 }
 
+basicDemo();
 async function basicDemo() {
     // {"name":"memo","age":18}
     var json = await stringify({ name: 'memo', age: 18 });
@@ -60,4 +59,28 @@ async function basicDemo() {
     var object = await parse(json, [BigIntDeserializer]);
 
     console.log(json, object);
+}
+
+import { binarySerializer, binaryDeserializer } from '../../binary';
+import { errorSerializer, errorDeserializer } from '../../error';
+
+// demo3();
+async function demo3() {
+    var originalObject = {
+        name: 'memo',
+        age: 18,
+        refDemo: {
+            obj1: { obj2: {} },
+            arr: [],
+        },
+        errDemo: new TypeError('error-demo'),
+    };
+    originalObject.refDemo.arr[0] = originalObject.refDemo.obj1.obj2;
+
+    var jsonText = await stringify(originalObject, [binarySerializer, errorSerializer]);
+    console.log(JSON.stringify(JSON.parse(jsonText), null, 4));
+
+    var object = await parse(jsonText, [binaryDeserializer, errorDeserializer]);
+    // true
+    console.log(object.refDemo.arr[0] === object.refDemo.obj1.obj2);
 }

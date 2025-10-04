@@ -1,4 +1,4 @@
-# @json-serialization/binary <a href="https://github.com/memo-cn/json-serialization/blob/main/packages/binary/README.md"><img src="https://img.shields.io/npm/v/@json-serialization/binary.svg" /></a> <a href="https://github.com/memo-cn/json-serialization/blob/main/packages/binary/README.md"><img src="https://packagephobia.now.sh/badge?p=@json-serialization/binary" /></a>
+# @json-serialization/binary <a href="https://www.npmjs.com/package/@json-serialization/binary"><img src="https://img.shields.io/npm/v/@json-serialization/binary.svg" /></a>
 
 [English](https://github.com/memo-cn/json-serialization/blob/main/packages/binary/README.md) | [简体中文](https://github.com/memo-cn/json-serialization/blob/main/packages/binary/README.zh-CN.md)
 
